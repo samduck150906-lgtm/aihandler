@@ -18,10 +18,12 @@ export function PaywallModal({ isOpen, onClose, onUpgradeSuccess }: PaywallModal
   const [paddle, setPaddle] = useState<Paddle>();
 
   useEffect(() => {
-    const token = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN;
-    if (token && token !== "test_token_placeholder") {
+    // 💡 Paddle Production Config injected
+    const token = "live_3d08d719af0a173da9005cc3e5f";
+    
+    if (token) {
       initializePaddle({ 
-        environment: process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT === "production" ? "production" : "sandbox", 
+        environment: "production", 
         token: token,
         eventCallback: function(event) {
           if (event.name === "checkout.completed") {
@@ -49,10 +51,10 @@ export function PaywallModal({ isOpen, onClose, onUpgradeSuccess }: PaywallModal
   };
 
   const handlePaddlePayment = () => {
-    const priceId = process.env.NEXT_PUBLIC_PADDLE_PRICE_ID;
+    const priceId = "pri_01kmn03172jam7er9wrhnmbr29";
     
-    if (!paddle || !priceId || priceId === "pri_placeholder") {
-      alert(" Paddle 연동 설정 파일(.env.local)에 Client Token과 Price ID가 제공되지 않아 데모 모드로 작동합니다. 설정 후 실제 결제창이 뜹니다.");
+    if (!paddle) {
+      alert("패들 결제 모듈이 초기화되지 않았습니다. 잠시 후 다시 시도해 주세요.");
       return;
     }
     
