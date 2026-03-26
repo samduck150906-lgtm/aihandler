@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     icon: "/favicon.ico",
   },
   verification: {
-    google: "ylogL2m_WSy4ea6-d-PNE7QseedB_xVxdIgBzPI8ys0",
+    google: "M6tMtEGAXW6LN0_yZixeMGdZL5QrztsT8lkU0FQUZfw",
   },
 };
 
@@ -42,10 +42,6 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <head>
-        <meta
-          name="naver-site-verification"
-          content="6f887602e70fb4215c260fe9adfca1ae6c9f1fa1"
-        />
         <link rel="stylesheet" href="/globals.css" />
         <link
           rel="stylesheet"
