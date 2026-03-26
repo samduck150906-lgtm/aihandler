@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, Sparkles, CreditCard, Wallet, Landmark, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { initializePaddle, Paddle } from "@paddle/paddle-js";
 
 interface PaywallModalProps {
   isOpen: boolean;
@@ -14,6 +15,24 @@ export function PaywallModal({ isOpen, onClose, onUpgradeSuccess }: PaywallModal
   const [selectedMethod, setSelectedMethod] = useState<"paddle" | "korean" | "bank" | null>(null);
   const [depositorName, setDepositorName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [paddle, setPaddle] = useState<Paddle>();
+
+  useEffect(() => {
+    const token = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN;
+    if (token && token !== "test_token_placeholder") {
+      initializePaddle({ 
+        environment: process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT === "production" ? "production" : "sandbox", 
+        token: token,
+        eventCallback: function(event) {
+          if (event.name === "checkout.completed") {
+            onUpgradeSuccess();
+          }
+        }
+      }).then((paddleInstance) => {
+        if (paddleInstance) setPaddle(paddleInstance);
+      });
+    }
+  }, [onUpgradeSuccess]);
 
   if (!isOpen) return null;
 
@@ -30,8 +49,16 @@ export function PaywallModal({ isOpen, onClose, onUpgradeSuccess }: PaywallModal
   };
 
   const handlePaddlePayment = () => {
-    // TODO: Initialize Paddle Integration
-    alert("Paddle 해외 결제 모듈 연동 준비 중입니다.");
+    const priceId = process.env.NEXT_PUBLIC_PADDLE_PRICE_ID;
+    
+    if (!paddle || !priceId || priceId === "pri_placeholder") {
+      alert(" Paddle 연동 설정 파일(.env.local)에 Client Token과 Price ID가 제공되지 않아 데모 모드로 작동합니다. 설정 후 실제 결제창이 뜹니다.");
+      return;
+    }
+    
+    paddle.Checkout.open({
+      items: [{ priceId: priceId, quantity: 1 }]
+    });
   };
 
   const handleKoreanPayment = () => {
