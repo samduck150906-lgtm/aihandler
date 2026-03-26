@@ -11,6 +11,7 @@ import { PromptResult } from "@/components/prompt-result";
 import { Skeleton } from "@/components/skeleton";
 import { PaywallModal } from "@/components/paywall-modal";
 
+import Link from "next/link";
 import { AI_TOOLS, type Category } from "@/lib/data/ai-tools";
 
 const TONES = ["상관없음", "전문적인", "친근한", "분석적인", "창의적인", "직설적인"];
@@ -55,6 +56,20 @@ export default function HomePage() {
   const [purpose, setPurpose] = useState("");
   const [tone, setTone] = useState(TONES[0]);
   const [length, setLength] = useState(LENGTHS[0]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const toolSlug = params.get("tool");
+      if (toolSlug) {
+        const found = AI_TOOLS.find(t => t.slug === toolSlug);
+        if (found) {
+          setSelectedAI(found.name);
+          setActiveTab("generator");
+        }
+      }
+    }
+  }, []);
   
   // Link Hub State
   const [activeCategory, setActiveCategory] = useState<Category>("전체");
@@ -431,7 +446,11 @@ export default function HomePage() {
             {filteredTools.map((tool) => (
               <div key={tool.name} className="bg-white dark:bg-zinc-900 border-[2px] border-ink dark:border-zinc-700 shadow-[3px_3px_0px_#1f2937] dark:shadow-[3px_3px_0px_#000]">
                 <div className={cn("px-4 py-2 flex justify-between items-center border-b-2 border-ink dark:border-zinc-800", tool.color)}>
-                  <h3 className="font-black text-[15px]">{tool.name}</h3>
+                  <h3 className="font-black text-[15px]">
+                    <Link href={`/tools/${tool.slug}`} className="hover:underline">
+                      {tool.name}
+                    </Link>
+                  </h3>
                   <span className="text-[10px] font-bold px-1.5 py-0.5 border border-current bg-white dark:bg-black/20 text-white">
                     {tool.desc}
                   </span>

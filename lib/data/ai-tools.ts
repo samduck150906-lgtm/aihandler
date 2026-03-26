@@ -2,6 +2,7 @@ export type Category = "전체" | "텍스트/LLM" | "이미지" | "비디오" | 
 
 export interface AITool {
   name: string;
+  slug: string;
   desc: string;
   category: Category;
   color: string;
@@ -16,6 +17,7 @@ export const AI_TOOLS: AITool[] = [
   // --- 텍스트/LLM ---
   {
     name: "ChatGPT",
+    slug: "chatgpt",
     desc: "OpenAI의 대화형 AI 표준",
     category: "텍스트/LLM",
     color: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800",
@@ -27,6 +29,7 @@ export const AI_TOOLS: AITool[] = [
   },
   {
     name: "Claude",
+    slug: "claude",
     desc: "Anthropic의 가장 섬세한 AI",
     category: "텍스트/LLM",
     color: "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950 dark:text-orange-300 dark:border-orange-800",
@@ -38,6 +41,7 @@ export const AI_TOOLS: AITool[] = [
   },
   {
     name: "Gemini",
+    slug: "gemini",
     desc: "Google의 최신 멀티모달",
     category: "텍스트/LLM",
     color: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800",
@@ -49,6 +53,7 @@ export const AI_TOOLS: AITool[] = [
   },
   {
     name: "Perplexity",
+    slug: "perplexity",
     desc: "신뢰도 높은 AI 검색 엔진",
     category: "텍스트/LLM",
     color: "bg-cyan-50 text-cyan-700 border-cyan-200 dark:bg-cyan-950 dark:text-cyan-300 dark:border-cyan-800",
@@ -60,19 +65,21 @@ export const AI_TOOLS: AITool[] = [
   },
   {
     name: "뤼튼 (Wrtn)",
+    slug: "wrtn",
     desc: "국내 최적화 무료 AI 포털",
     category: "텍스트/LLM",
     color: "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950 dark:text-indigo-300 dark:border-indigo-800",
     price: "무료 (프리미엄 예정)",
     signUpUrl: "https://wrtn.ai",
     deleteAccountUrl: "https://wrtn.ai/settings/account",
-    subscribeUrl: "https://wrtn.ai", // 현재 결제 비활성/무료
+    subscribeUrl: "https://wrtn.ai",
     cancelSubscriptionUrl: "https://wrtn.ai/settings",
   },
 
   // --- 이미지 ---
   {
     name: "Midjourney",
+    slug: "midjourney",
     desc: "고품질 예술적 이미지 생성",
     category: "이미지",
     color: "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-800",
@@ -84,6 +91,7 @@ export const AI_TOOLS: AITool[] = [
   },
   {
     name: "DALL-E 3",
+    slug: "dalle-3",
     desc: "프롬프트 충실도가 높은 이미지",
     category: "이미지",
     color: "bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-950 dark:text-teal-300 dark:border-teal-800",
@@ -95,6 +103,7 @@ export const AI_TOOLS: AITool[] = [
   },
   {
     name: "Stable Diffusion",
+    slug: "stable-diffusion",
     desc: "무한한 자유도의 오픈소스 이미지",
     category: "이미지",
     color: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950 dark:text-rose-300 dark:border-rose-800",
@@ -106,6 +115,7 @@ export const AI_TOOLS: AITool[] = [
   },
   {
     name: "Leonardo AI",
+    slug: "leonardo-ai",
     desc: "게임 에셋/그래픽 최적화",
     category: "이미지",
     color: "bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200 dark:bg-fuchsia-950 dark:text-fuchsia-300 dark:border-fuchsia-800",
@@ -117,6 +127,7 @@ export const AI_TOOLS: AITool[] = [
   },
   {
     name: "Freepik AI",
+    slug: "freepik-ai",
     desc: "디자이너를 위한 실무형 이미지",
     category: "이미지",
     color: "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950 dark:text-sky-300 dark:border-sky-800",
@@ -130,6 +141,7 @@ export const AI_TOOLS: AITool[] = [
   // --- 비디오 ---
   {
     name: "Runway (Gen-2)",
+    slug: "runway",
     desc: "시네마틱 비디오 생성 및 편집",
     category: "비디오",
     color: "bg-pink-50 text-pink-700 border-pink-200 dark:bg-pink-950 dark:text-pink-300 dark:border-pink-800",
@@ -141,6 +153,7 @@ export const AI_TOOLS: AITool[] = [
   },
   {
     name: "Pika",
+    slug: "pika",
     desc: "빠르고 직관적인 텍스트/이미지 2 비디오",
     category: "비디오",
     color: "bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-950 dark:text-violet-300 dark:border-violet-800",
@@ -152,6 +165,7 @@ export const AI_TOOLS: AITool[] = [
   },
   {
     name: "Haiper",
+    slug: "haiper",
     desc: "역동적인 숏폼 AI 모션 비디오",
     category: "비디오",
     color: "bg-red-50 text-red-700 border-red-200 dark:bg-red-950 dark:text-red-300 dark:border-red-800",
@@ -163,6 +177,7 @@ export const AI_TOOLS: AITool[] = [
   },
   {
     name: "Luma Dream Machine",
+    slug: "luma",
     desc: "압도적 퀄리티의 고속 비디오 생성",
     category: "비디오",
     color: "bg-stone-100 text-stone-700 border-stone-300 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-600",
@@ -174,6 +189,7 @@ export const AI_TOOLS: AITool[] = [
   },
   {
     name: "Sora",
+    slug: "sora",
     desc: "OpenAI의 혁신적 공간 물리엔진 비디오",
     category: "비디오",
     color: "bg-slate-100 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600",
@@ -187,6 +203,7 @@ export const AI_TOOLS: AITool[] = [
   // --- 오디오/음악 ---
   {
     name: "Suno",
+    slug: "suno",
     desc: "고퀄리티 보컬/반주 음악 통합 생성",
     category: "오디오/음악",
     color: "bg-lime-50 text-lime-700 border-lime-200 dark:bg-lime-950 dark:text-lime-300 dark:border-lime-800",
@@ -198,6 +215,7 @@ export const AI_TOOLS: AITool[] = [
   },
   {
     name: "Udio",
+    slug: "udio",
     desc: "Suno 대항마, 섬세한 장르 커스텀 특화",
     category: "오디오/음악",
     color: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800",
@@ -209,6 +227,7 @@ export const AI_TOOLS: AITool[] = [
   },
   {
     name: "ElevenLabs",
+    slug: "elevenlabs",
     desc: "세계 최고 수준의 자연스러운 AI TTS",
     category: "오디오/음악",
     color: "bg-zinc-100 text-zinc-700 border-zinc-300 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-600",
@@ -222,6 +241,7 @@ export const AI_TOOLS: AITool[] = [
   // --- 생산성/코딩 ---
   {
     name: "Notion AI",
+    slug: "notion-ai",
     desc: "문서 작업 공간 내 통합형 어시스턴트",
     category: "생산성/코딩",
     color: "bg-gray-50 text-gray-700 border-gray-200 dark:bg-zinc-800 dark:text-gray-300 dark:border-gray-700",
@@ -233,6 +253,7 @@ export const AI_TOOLS: AITool[] = [
   },
   {
     name: "GitHub Copilot",
+    slug: "github-copilot",
     desc: "IDE에 내장된 세계 최대 AI 페어 프로그래머",
     category: "생산성/코딩",
     color: "bg-slate-100 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600",
@@ -244,6 +265,7 @@ export const AI_TOOLS: AITool[] = [
   },
   {
     name: "Gamma",
+    slug: "gamma",
     desc: "타이핑 한 번에 완성되는 AI PPT 생성기",
     category: "생산성/코딩",
     color: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950 dark:text-rose-300 dark:border-rose-800",
@@ -255,6 +277,7 @@ export const AI_TOOLS: AITool[] = [
   },
   {
     name: "Canva AI",
+    slug: "canva-ai",
     desc: "초보자를 위한 매직스튜디오 디자인 도구",
     category: "생산성/코딩",
     color: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800",
