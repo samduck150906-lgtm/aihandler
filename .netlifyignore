@@ -1,0 +1,11 @@
+# 삼덕맨션 배포 시 루트 Next(뭐였더라)는 사용하지 않음 — 업로드만 줄이기
+app/
+lib/
+hooks/
+components/
+public/
+.next/
+types/
+next.config.js
+tsconfig.build.json
+tsconfig.json

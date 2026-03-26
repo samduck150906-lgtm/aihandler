@@ -1,0 +1,11 @@
+# 삼덕맨션 프론트엔드 배포 (React + Vite)
+[build]
+  base    = "samdeok-mansion/frontend"
+  command = "npm run build"
+  publish = "dist"
+
+# SPA: React Router — 모든 경로를 index.html로
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
