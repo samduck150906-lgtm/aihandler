@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { X, Sparkles, CreditCard, Wallet, Landmark, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { initializePaddle, Paddle } from "@paddle/paddle-js";
+import { loadTossPayments } from "@tosspayments/payment-sdk";
 
 interface PaywallModalProps {
   isOpen: boolean;
@@ -63,9 +64,34 @@ export function PaywallModal({ isOpen, onClose, onUpgradeSuccess }: PaywallModal
     });
   };
 
-  const handleKoreanPayment = () => {
-    // TODO: Initialize Portone/KCP Integration
-    alert("국내 신용카드/카카오페이 결제 모듈 연동 준비 중입니다.");
+  const handleKoreanPayment = async () => {
+    setIsSubmitting(true);
+    try {
+      // 💡 Toss Client Key (Fallback to test mode key so the modal works instantly anywhere)
+      // Once the user puts NEXT_PUBLIC_TOSS_CLIENT_KEY in Netlify, it will switch to LIVE seamlessly.
+      const tossClientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY || "test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq";
+      const tossPayments = await loadTossPayments(tossClientKey);
+      
+      const uuid = typeof crypto !== "undefined" && crypto.randomUUID 
+        ? crypto.randomUUID().replace(/-/g, "") 
+        : Date.now().toString();
+
+      await tossPayments.requestPayment("카드", {
+        amount: 29000,
+        orderId: `order_${uuid}`,
+        orderName: "프리미엄 평생 소장권",
+        customerName: "고객님",
+        successUrl: window.location.origin + "?payment=success",
+        failUrl: window.location.origin + "?payment=fail",
+      });
+    } catch (err: any) {
+      if (err.code === "USER_CANCEL") {
+        setIsSubmitting(false); // 결제창 닫힘
+      } else {
+        alert("결제 초기화 오류: " + err.message);
+        setIsSubmitting(false);
+      }
+    }
   };
 
   return (

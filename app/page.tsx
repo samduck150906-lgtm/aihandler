@@ -60,6 +60,19 @@ export default function HomePage() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
+      
+      // Handle Toss Payments success
+      const paymentStatus = params.get("payment");
+      if (paymentStatus === "success") {
+        unlockPremium();
+        alert("프리미엄 결제가 완료되었습니다! 이제 AI 핸들러를 무제한으로 자유롭게 이용해 보세요.");
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } else if (paymentStatus === "fail") {
+        alert("결제가 취소되었거나 실패했습니다.");
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+
+      // Handle AI Tool routing
       const toolSlug = params.get("tool");
       if (toolSlug) {
         const found = AI_TOOLS.find(t => t.slug === toolSlug);
@@ -69,7 +82,7 @@ export default function HomePage() {
         }
       }
     }
-  }, []);
+  }, [unlockPremium]);
   
   // Link Hub State
   const [activeCategory, setActiveCategory] = useState<Category>("전체");
