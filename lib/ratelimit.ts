@@ -105,11 +105,16 @@ function checkMemory(identifier: string): RateLimitResult {
 }
 
 export async function rateLimit(identifier: string): Promise<RateLimitResult> {
-  if (
-    process.env.UPSTASH_REDIS_REST_URL &&
-    process.env.UPSTASH_REDIS_REST_TOKEN
-  ) {
-    return checkUpstash(identifier);
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  
+  if (url && token && token.length > 20) {
+    try {
+      return await checkUpstash(identifier);
+    } catch (e) {
+      console.error("[RateLimit] Upstash fallback to in-memory due to error:", e);
+      return checkMemory(identifier);
+    }
   }
   return checkMemory(identifier);
 }
