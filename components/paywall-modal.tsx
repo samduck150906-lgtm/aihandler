@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { X, Sparkles, CreditCard, Wallet, Landmark, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -13,29 +13,9 @@ interface PaywallModalProps {
 }
 
 export function PaywallModal({ isOpen, onClose, onUpgradeSuccess }: PaywallModalProps) {
-  const [selectedMethod, setSelectedMethod] = useState<"paddle" | "korean" | "bank" | null>(null);
+  const [selectedMethod, setSelectedMethod] = useState<"korean" | "bank" | null>(null);
   const [depositorName, setDepositorName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [paddle, setPaddle] = useState<Paddle>();
-
-  useEffect(() => {
-    // 💡 Paddle Production Config injected
-    const token = "live_3d08d719af0a173da9005cc3e5f";
-    
-    if (token) {
-
-        environment: "production", 
-        token: token,
-        eventCallback: function(event) {
-          if (event.name === "checkout.completed") {
-            onUpgradeSuccess();
-          }
-        }
-      }).then((paddleInstance) => {
-        if (paddleInstance) setPaddle(paddleInstance);
-      });
-    }
-  }, [onUpgradeSuccess]);
 
   if (!isOpen) return null;
 
@@ -51,18 +31,7 @@ export function PaywallModal({ isOpen, onClose, onUpgradeSuccess }: PaywallModal
     }, 1200);
   };
 
-  const handlePaddlePayment = () => {
-    const priceId = "pri_01kmn03172jam7er9wrhnmbr29";
-    
-    if (!paddle) {
-      alert("패들 결제 모듈이 초기화되지 않았습니다. 잠시 후 다시 시도해 주세요.");
-      return;
-    }
-    
 
-      items: [{ priceId: priceId, quantity: 1 }]
-    });
-  };
 
   const handleKoreanPayment = async () => {
     setIsSubmitting(true);
@@ -127,21 +96,7 @@ export function PaywallModal({ isOpen, onClose, onUpgradeSuccess }: PaywallModal
           <div className="space-y-3 mb-8">
             <p className="text-xs font-black text-ink dark:text-zinc-300 uppercase tracking-widest pl-1 mb-2">결제 수단 선택</p>
             
-            <button 
-              onClick={() => { setSelectedMethod("paddle"); handlePaddlePayment(); }}
-              className={cn(
-                "w-full flex items-center gap-3 p-4 border-[2px] border-ink dark:border-zinc-700 text-left transition-transform hover:-translate-y-0.5 shadow-[2px_2px_0px_#1f2937] dark:shadow-[2px_2px_0px_#000]",
-                selectedMethod === "paddle" ? "bg-brand-50 dark:bg-brand-950/20 ring-2 ring-brand-500" : "bg-white dark:bg-zinc-800"
-              )}
-            >
-              <div className="w-10 h-10 bg-surface-muted dark:bg-zinc-900 flex items-center justify-center border-2 border-ink-faint dark:border-zinc-700">
-                <Wallet className="w-5 h-5 text-ink dark:text-zinc-300" />
-              </div>
-              <div>
-                <div className="font-black text-ink dark:text-zinc-100 text-sm">해외 결제 (Paddle)</div>
-                <div className="text-[11px] font-bold text-ink-muted dark:text-zinc-500 tracking-tight">Visa, Mastercard, PayPal 등 지원</div>
-              </div>
-            </button>
+
 
             <button 
               onClick={() => { setSelectedMethod("korean"); handleKoreanPayment(); }}
