@@ -3,8 +3,7 @@ import {
   chatRequestBodySchema,
   aiResponseSchema,
   questionResponseSchema,
-  resultResponseSchema,
-} from "./schemas";
+  resultResponseSchema } from "./schemas";
 
 describe("chatRequestBodySchema", () => {
   it("rejects empty messages", () => {

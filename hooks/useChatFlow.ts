@@ -7,8 +7,7 @@ import type {
   AppPhase,
   ResultResponse,
   QuestionResponse,
-  AIResponse,
-} from "@/lib/types";
+  AIResponse } from "@/lib/types";
 
 export type ErrorCode =
   | "network"

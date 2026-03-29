@@ -1,8 +1,7 @@
 import type {
   AIResponseSchema,
   QuestionResponseSchema,
-  ResultResponseSchema,
-} from "./schemas";
+  ResultResponseSchema } from "./schemas";
 
 // ── AI 응답 타입 (schemas와 동기화) ──────────────────
 export type Category = ResultResponseSchema["category"];

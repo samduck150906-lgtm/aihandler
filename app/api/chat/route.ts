@@ -5,8 +5,7 @@ import { getSystemPrompt } from "@/lib/prompt";
 import {
   chatRequestBodySchema,
   aiResponseSchema,
-  type AIResponseSchema,
-} from "@/lib/schemas";
+  type AIResponseSchema } from "@/lib/schemas";
 import { rateLimit } from "@/lib/ratelimit";
 
 export const runtime = "edge";
