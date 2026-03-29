@@ -1,5 +1,5 @@
 
-
+import React from 'react';
 
 export default function Footer() {
   return (
@@ -9,13 +9,17 @@ export default function Footer() {
           <a href="/terms.html" style={{ color: '#374151', textDecoration: 'none' }}>이용약관</a>
           <a href="/privacy.html" style={{ color: '#374151', textDecoration: 'none' }}>개인정보처리방침</a>
           <a href="/refund.html" style={{ color: '#374151', textDecoration: 'none' }}>취소 및 환불 안내</a>
-          <a href="/checkout.html" style={{ color: "#4f46e5", textDecoration: "none", marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: "6px", backgroundColor: "#e0e7ff", padding: "4px 12px", borderRadius: "12px" }}>🛒 <strong>비회원 장바구니/결제 </strong></a>
+          <a href="/checkout.html" style={{ color: "#4f46e5", textDecoration: "none", marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: "6px", backgroundColor: "#e0e7ff", padding: "4px 12px", borderRadius: "12px" }}>🛒 <strong>비회원 장바구니/결제 (테스트)</strong></a>
         </div>
         <div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', color: '#6b7280' }}>
-            <span>상호명: 이터널식스 | 대표자: 성아름 | 사업자등록번호: 303-28-65658</span>
-            <span>통신판매업: 제 2025-수원영통-1499호 | 주소: 경기도 수원시 영통구 삼성로 186-1 4층</span>
-            <span>연락처: 010-8111-9370 | 이메일: ceo@eternalsix.kr</span>
+          <p style={{ margin: 0, fontWeight: 'bold', color: '#374151', marginBottom: '8px', fontSize: '14px' }}>이터널식스</p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px' }}>
+            <span>대표자: 성아름</span>
+            <span>사업자등록번호: 303-28-65658</span>
+            <span>통신판매업: 제 2025-수원영통-1499호</span>
+            <span>연락처: 010-8111-9370</span>
+            <span>주소: 경기도 수원시 영통구 삼성로 186-1 4층</span>
+            <span>이메일: ceo@eternalsix.kr</span>
           </div>
         </div>
         <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

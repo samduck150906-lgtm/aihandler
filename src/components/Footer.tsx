@@ -1,33 +1,33 @@
-import React from 'react';
+
 
 export default function Footer() {
-    return (
-        <footer className="bg-gray-100 py-8 px-4 mt-auto">
-            <div className="container mx-auto">
-                <div className="flex flex-wrap justify-between items-start gap-6">
-                    <div className="max-w-md">
-                        <h3 className="font-bold text-lg mb-2">EternalSix</h3>
-                        <p className="text-gray-600 text-sm mb-4">
-                            Contact: <a href="mailto:ceo@eternalsix.com" className="text-blue-600 hover:underline">ceo@eternalsix.com</a>
-                        </p>
-                        
-                        <p className="text-gray-500 text-xs">
-                            Our order process is conducted by our online reseller Paddle.com. 
-                            Paddle.com is the Merchant of Record for all our orders. 
-                            Paddle provides all customer service inquiries and handles returns.
-                        </p>
-
-                    </div>
-                    <div className="flex flex-col gap-2 text-sm">
-                        <a href="/terms" className="text-gray-600 hover:text-gray-900 transition-colors">Terms of Service</a>
-                        <a href="/privacy" className="text-gray-600 hover:text-gray-900 transition-colors">Privacy Policy</a>
-                        <a href="/refund" className="text-gray-600 hover:text-gray-900 transition-colors">Refund Policy</a>
-                    </div>
-                </div>
-                <div className="mt-8 pt-4 border-t border-gray-200 text-center text-gray-400 text-xs">
-                    &copy; {new Date().getFullYear()} EternalSix. All rights reserved.
-                </div>
-            </div>
-        </footer>
-    );
+  return (
+    <footer style={{ padding: '24px 20px', backgroundColor: '#f9fafb', borderTop: '1px solid #f3f4f6', color: '#6b7280', fontSize: '12px', lineHeight: '1.6', marginTop: 'auto' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        <div style={{ marginBottom: '16px', display: 'flex', gap: '16px', fontWeight: 'bold' }}>
+          <a href="/terms.html" style={{ color: '#374151', textDecoration: 'none' }}>이용약관</a>
+          <a href="/privacy.html" style={{ color: '#374151', textDecoration: 'none' }}>개인정보처리방침</a>
+          <a href="/refund.html" style={{ color: '#374151', textDecoration: 'none' }}>취소 및 환불 안내</a>
+          <a href="/checkout.html" style={{ color: "#4f46e5", textDecoration: "none", marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: "6px", backgroundColor: "#e0e7ff", padding: "4px 12px", borderRadius: "12px" }}>🛒 <strong>비회원 장바구니/결제 (테스트)</strong></a>
+        </div>
+        <div>
+          <p style={{ margin: 0, fontWeight: 'bold', color: '#374151', marginBottom: '8px', fontSize: '14px' }}>이터널식스</p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px' }}>
+            <span>대표자: 성아름</span>
+            <span>사업자등록번호: 303-28-65658</span>
+            <span>통신판매업: 제 2025-수원영통-1499호</span>
+            <span>연락처: 010-8111-9370</span>
+            <span>주소: 경기도 수원시 영통구 삼성로 186-1 4층</span>
+            <span>이메일: ceo@eternalsix.kr</span>
+          </div>
+        </div>
+        <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <p style={{ margin: 0, color: '#9ca3af' }}>© Eternalsix. All rights reserved.</p>
+          <div style={{ background: '#fff', padding: '4px 12px', borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '11px', fontWeight: 'bold', color: '#4f46e5' }}>
+            TOSS PAYMENTS 가맹점
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
 }
