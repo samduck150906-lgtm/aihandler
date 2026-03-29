@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { X, Sparkles, CreditCard, Wallet, Landmark, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { initializePaddle, Paddle } from "@paddle/paddle-js";
+
 import { loadTossPayments } from "@tosspayments/payment-sdk";
 
 interface PaywallModalProps {
