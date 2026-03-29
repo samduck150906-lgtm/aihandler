@@ -9,7 +9,7 @@ import { usePromptHistory } from "@/hooks/usePromptHistory";
 import { useFreemium, MAX_FREE_LIMIT } from "@/hooks/useFreemium";
 import { PromptResult } from "@/components/prompt-result";
 import { Skeleton } from "@/components/skeleton";
-import { PaywallModal } from "@/components/paywall-modal";
+
 
 import Link from "next/link";
 import { AI_TOOLS, type Category } from "@/lib/data/ai-tools";
@@ -38,7 +38,7 @@ export default function HomePage() {
   const { history, savePrompt, removePrompt, clearHistory } = usePromptHistory();
   const { usageCount, isPremium, isLoaded, canGenerate, incrementUsage, unlockPremium } = useFreemium();
 
-  const [showPaywall, setShowPaywall] = useState(false);
+
 
   // Save history and increment usage when a beautiful new response arrives
   useEffect(() => {
@@ -112,7 +112,7 @@ export default function HomePage() {
     
     // Check Freemium Limitation
     if (!canGenerate) {
-      setShowPaywall(true); 
+      window.location.href = '/checkout.html';
       return;
     }
 
@@ -137,15 +137,7 @@ export default function HomePage() {
 
   return (
     <main className="flex-1 flex flex-col bg-[#FAFAF8] dark:bg-zinc-950 transition-colors" role="main">
-      <PaywallModal 
-        isOpen={showPaywall} 
-        onClose={() => setShowPaywall(false)} 
-        onUpgradeSuccess={() => {
-          unlockPremium();
-          setShowPaywall(false);
-          alert("프리미엄 무제한 이용권이 활성화되었습니다!");
-        }} 
-      />
+
 
       <header className="sticky top-0 z-50 bg-white dark:bg-zinc-900 border-b-[3px] border-ink dark:border-zinc-800 shadow-sm">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -316,7 +308,7 @@ export default function HomePage() {
                           />
                         </div>
                         {usageCount >= MAX_FREE_LIMIT && (
-                           <button type="button" onClick={() => setShowPaywall(true)} className="text-[10px] font-bold text-white bg-ink dark:bg-zinc-300 dark:text-zinc-900 px-2.5 py-1 rounded">제한 해제</button>
+                           <a href="/checkout.html" className="text-[10px] font-bold text-white bg-ink dark:bg-zinc-300 dark:text-zinc-900 px-2.5 py-1 rounded">제한 해제</a>
                         )}
                       </div>
                     )}
