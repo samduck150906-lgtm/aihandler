@@ -23,7 +23,7 @@ export function PaywallModal({ isOpen, onClose, onUpgradeSuccess }: PaywallModal
     const token = "live_3d08d719af0a173da9005cc3e5f";
     
     if (token) {
-      initializePaddle({ 
+
         environment: "production", 
         token: token,
         eventCallback: function(event) {
@@ -59,7 +59,7 @@ export function PaywallModal({ isOpen, onClose, onUpgradeSuccess }: PaywallModal
       return;
     }
     
-    paddle.Checkout.open({
+
       items: [{ priceId: priceId, quantity: 1 }]
     });
   };
