@@ -68,7 +68,7 @@ export function PromptResult({ result, onRetry }: PromptResultProps) {
               onClick={handleCopy}
               className={cn(
                 "hidden md:flex absolute top-3 right-3 p-2 transition-all border-[2px] border-ink dark:border-zinc-700 hover:-translate-y-0.5 shadow-[2px_2px_0px_#1f2937] dark:shadow-[2px_2px_0px_#000] active:translate-y-0 active:shadow-none",
-                copied ? "bg-emerald-400 text-ink dark:bg-emerald-500 dark:text-zinc-900" : "bg-brand-500 text-white dark:bg-brand-600 dark:border-black"
+                copied ? "bg-emerald-400 text-ink dark:bg-emerald-500 dark:text-zinc-900 animate-bounce-subtle" : "bg-brand-500 text-white dark:bg-brand-600 dark:border-black"
               )}
               aria-label="Copy Prompt"
             >
@@ -115,7 +115,7 @@ export function PromptResult({ result, onRetry }: PromptResultProps) {
               "text-sm font-black",
               "active:translate-y-[1px]",
               "transition-all duration-150 shadow-[2px_2px_0px_#1f2937] dark:shadow-[2px_2px_0px_#000]",
-              copied ? "bg-emerald-500 hover:bg-emerald-600 border-transparent text-white" : "bg-ink dark:bg-zinc-100 dark:text-zinc-900 hover:bg-gray-800"
+              copied ? "bg-emerald-500 hover:bg-emerald-600 border-transparent text-white animate-bounce-subtle" : "bg-ink dark:bg-zinc-100 dark:text-zinc-900 hover:bg-gray-800"
             )}
           >
             {copied ? (

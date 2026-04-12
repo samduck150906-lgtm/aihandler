@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 const USAGE_KEY = "prompt_maker_usage";
 const COINS_KEY = "prompt_maker_coins";
 const ADMIN_KEY = "prompt_maker_admin";
+const EMAIL_KEY = "prompt_maker_email";
 
 export const MAX_FREE_LIMIT = 3;
 export const COST_PER_GENERATION = 3;
@@ -19,6 +20,7 @@ export function useFreemium() {
   const [usageCount, setUsageCount] = useState<number>(0);
   const [coins, setCoins] = useState<number>(0);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [userEmail, setUserEmail] = useState<string>("");
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -26,6 +28,7 @@ export function useFreemium() {
       const storedUsage = localStorage.getItem(USAGE_KEY);
       const storedCoins = localStorage.getItem(COINS_KEY);
       const storedAdmin = localStorage.getItem(ADMIN_KEY);
+      const storedEmail = localStorage.getItem(EMAIL_KEY);
       
       if (storedUsage) {
         setUsageCount(parseInt(storedUsage, 10));
@@ -35,6 +38,9 @@ export function useFreemium() {
       }
       if (storedAdmin === "true") {
         setIsAdmin(true);
+      }
+      if (storedEmail) {
+        setUserEmail(storedEmail);
       }
     } catch (e) {
       console.error("Failed to read freemium state", e);
@@ -62,8 +68,16 @@ export function useFreemium() {
     try { localStorage.setItem(COINS_KEY, nextCoins.toString()); } catch (e) {}
   };
 
+  const saveEmail = (email: string) => {
+    const trimmed = email.trim().toLowerCase();
+    setUserEmail(trimmed);
+    try { localStorage.setItem(EMAIL_KEY, trimmed); } catch (e) {}
+  };
+
   const verifyAdmin = (email: string) => {
-    if (ADMIN_EMAILS.includes(email.trim().toLowerCase())) {
+    const trimmed = email.trim().toLowerCase();
+    saveEmail(trimmed);
+    if (ADMIN_EMAILS.includes(trimmed)) {
       setIsAdmin(true);
       try { localStorage.setItem(ADMIN_KEY, "true"); } catch (e) {}
       return true;
@@ -77,10 +91,12 @@ export function useFreemium() {
     usageCount,
     coins,
     isAdmin,
+    userEmail,
     isLoaded,
     canGenerate,
     incrementUsage,
     addCoins,
+    saveEmail,
     verifyAdmin,
   };
 }

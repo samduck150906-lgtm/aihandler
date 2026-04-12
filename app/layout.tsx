@@ -9,20 +9,49 @@ export const metadata: Metadata = {
   description:
     "AI 툴별 최적화된 프롬프트 자동 생성 및 주요 AI 툴 가입/구독 한방 링크 통합 솔루션",
   metadataBase: new URL("https://aihandler.run"),
+  alternates: {
+    canonical: "/",
+  },
+  keywords: [
+    "AI 프롬프트",
+    "프롬프트 지니어",
+    "ChatGPT 프롬프트",
+    "미드저니 프롬프트",
+    "AI 툴 허브",
+    "프롬프트 자동생성",
+    "AI Handler",
+  ],
   openGraph: {
-    title: "AI 핸들러 (AI Handler)",
-    description: "전 세계 모든 AI를 지휘하는 당신만의 프롬프트 통합 허브",
+    title: "AI 핸들러 (AI Handler) - 전 세계 AI를 지휘하는 프롬프트 허브",
+    description: "AI 툴별 최적화된 프롬프트 자동 생성 및 글로벌 AI 마켓 직통 링크 통합 솔루션",
     url: "https://aihandler.run",
     siteName: "AI Handler",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "AI Handler - Premium Prompt Engine",
+      },
+    ],
     type: "website",
     locale: "ko_KR",
   },
   twitter: {
     card: "summary_large_image",
-    description: "AI 툴별 최적화된 프롬프트 자동 생성",
+    title: "AI 핸들러 (AI Handler)",
+    description: "전 세계 모든 AI를 지휘하는 당신만의 프롬프트 통합 허브",
+    images: ["/og-image.png"],
   },
   icons: {
     icon: "/favicon.ico",
+    apple: "/favicon.ico",
+  },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "AI Handler",
   },
   verification: {
     google: "M6tMtEGAXW6LN0_yZixeMGdZL5QrztsT8lkU0FQUZfw",

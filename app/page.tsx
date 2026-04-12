@@ -36,7 +36,7 @@ export default function HomePage() {
   } = useChatFlow();
 
   const { history, savePrompt, removePrompt, clearHistory } = usePromptHistory();
-  const { usageCount, coins, isAdmin, isLoaded, canGenerate, incrementUsage, addCoins, verifyAdmin } = useFreemium();
+  const { usageCount, coins, isAdmin, userEmail, isLoaded, canGenerate, incrementUsage, addCoins, verifyAdmin } = useFreemium();
 
 
 
@@ -332,7 +332,10 @@ export default function HomePage() {
                           보유 코인: <span className="text-brand-600 dark:text-brand-400 ml-1 mr-2 text-sm">💎 {coins}</span>
                           <span className="text-ink-muted dark:text-zinc-500 text-[10px]">(1회 = {COST_PER_GENERATION}코인 차감)</span>
                         </div>
-                        <a href="/checkout.html" className="text-[10px] sm:text-xs font-black text-white bg-ink dark:bg-zinc-300 dark:text-zinc-900 px-3 py-1.5 border-[2px] border-ink dark:border-black rounded-none shadow-[2px_2px_0px_#1f2937] dark:shadow-[2px_2px_0px_#000] hover:bg-brand-500 hover:text-white transition-colors uppercase">
+                        <a 
+                          href={`/checkout.html${userEmail ? `?email=${encodeURIComponent(userEmail)}` : ''}`} 
+                          className="text-[10px] sm:text-xs font-black text-white bg-ink dark:bg-zinc-300 dark:text-zinc-900 px-3 py-1.5 border-[2px] border-ink dark:border-black rounded-none shadow-[2px_2px_0px_#1f2937] dark:shadow-[2px_2px_0px_#000] hover:bg-brand-500 hover:text-white transition-colors uppercase"
+                        >
                            코인 충전 ⚡
                         </a>
                       </div>

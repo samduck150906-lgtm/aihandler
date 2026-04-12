@@ -47,6 +47,7 @@ module.exports = {
         "slide-up": "slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
         "pop-in": "popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)",
         "pulse-dot": "pulseDot 1.2s ease-in-out infinite",
+        "bounce-subtle": "bounceSubtle 0.4s ease-out",
       },
       keyframes: {
         fadeIn: {
@@ -64,6 +65,10 @@ module.exports = {
         pulseDot: {
           "0%, 80%, 100%": { transform: "scale(0.5)", opacity: "0.3" },
           "40%": { transform: "scale(1)", opacity: "1" },
+        },
+        bounceSubtle: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-4px)" },
         },
       },
     },
