@@ -116,14 +116,9 @@ export default function HomePage() {
       return;
     }
 
-    const selectedToolObj = AI_TOOLS.find(t => t.name === selectedAI) || AI_TOOLS[0];
-    const categoryInject = `[카테고리: ${selectedToolObj.category}]`;
-    const toneParam = tone === "상관없음" ? "" : ` [어조: ${tone}]`;
-    const lenParam = length === "상관없음" ? "" : ` [길이: ${length}]`;
-    const query = `${categoryInject} [대상AI: ${selectedAI}]${toneParam}${lenParam} 목적: ${purpose.trim()}`;
-    
     clearError();
-    handleSearch(query);
+    // 프론트엔드 자동 조립 로직으로 전달 (API 통신 제거)
+    handleSearch(selectedAI, purpose.trim(), tone, length);
   };
 
   const copyHistoryText = async (text: string) => {

@@ -8,6 +8,8 @@ import type {
   ResultResponse,
   QuestionResponse,
   AIResponse } from "@/lib/types";
+import { generatePrompt } from "@/lib/generatePrompt";
+import { AI_TOOLS } from "@/lib/data/ai-tools";
 
 export type ErrorCode =
   | "network"
@@ -28,7 +30,7 @@ export interface UseChatFlowReturn {
   errorCode: ErrorCode;
   isLoading: boolean;
   isActive: boolean;
-  handleSearch: (query: string) => void;
+  handleSearch: (aiName: string, purpose: string, tone: string, length: string) => void;
   handleAnswer: (answer: "네" | "아니오" | "몰라요") => void;
   handleRetry: () => void;
   handleReset: () => void;
@@ -51,124 +53,61 @@ export function useChatFlow(): UseChatFlowReturn {
     setErrorCode(null);
   }, []);
 
-  const sendToAI = useCallback(
-    async (newMessages: ChatMessage[], count: number) => {
-      setError(null);
-      setErrorCode(null);
-      setPhase("loading");
-
-      try {
-        const res = await fetch("/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            messages: newMessages,
-            questionCount: count,
-          }),
-        });
-
-        const data = await res.json().catch(() => ({}));
-
-        if (!res.ok) {
-          const isQuota =
-            data.code === "QUOTA_EXCEEDED" ||
-            (typeof data.error === "string" &&
-              /quota|billing|insufficient_quota/i.test(data.error));
-          if (res.status === 429) {
-            setErrorCode("429");
-            setError(
-              data.error ?? "요청이 너무 많아요. 잠시 후 다시 시도해 주세요."
-            );
-          } else if (isQuota || res.status === 503) {
-            setErrorCode("quota");
-            setError(
-              data.error ??
-                "서비스 이용량을 일시적으로 초과했어요. 잠시 후 다시 시도해 주세요."
-            );
-          } else if (res.status === 401) {
-            setErrorCode("401");
-            setError(data.error ?? "인증 설정에 문제가 있어요. 관리자에게 문의해 주세요.");
-          } else if (res.status === 400) {
-            setErrorCode("validation");
-            setError(data.error ?? "입력이 올바르지 않아요.");
-          } else {
-            setErrorCode("500");
-            setError(
-              data.error ?? "일시적인 오류가 났어요. 잠시 후 다시 시도해 주세요."
-            );
-          }
-          setPhase(history.length > 0 ? "question" : "idle");
-          return;
-        }
-
-        const parsed = data as AIResponse;
-
-        const updatedHistory: ChatMessage[] = [
-          ...newMessages,
-          { role: "assistant", content: JSON.stringify(parsed) },
-        ];
-        setHistory(updatedHistory);
-
-        if (parsed.type === "result") {
-          setCurrentResult(parsed);
-          setCurrentQuestion(null);
-          setPhase("result");
-          trackAnswerViewed(parsed.title, parsed.category);
-        } else {
-          setCurrentQuestion(parsed);
-          setCurrentResult(null);
-          setQuestionCount((prev) => prev + 1);
-          setPhase("question");
-        }
-      } catch {
-        setErrorCode("network");
-        setError("네트워크 연결을 확인해 주세요. 다시 시도해 주세요.");
-        setPhase(history.length > 0 ? "question" : "idle");
-      }
-    },
-    [history.length]
-  );
-
   const handleSearch = useCallback(
-    (query: string) => {
-      const trimmed = query.trim();
+    (aiName: string, purpose: string, tone: string, length: string) => {
+      const trimmed = purpose.trim();
       if (!trimmed) return;
       trackSearchExecuted(trimmed);
-      const newMessages: ChatMessage[] = [
-        ...history,
-        { role: "user", content: trimmed },
-      ];
-      setHistory(newMessages);
-      sendToAI(newMessages, questionCount);
+
+      setPhase("loading");
+      setError(null);
+      setErrorCode(null);
+
+      // 모의 지연 (자연스러운 UX 제공을 위해 약간의 딜레이만 줌)
+      setTimeout(() => {
+        const toolObj = AI_TOOLS.find((t) => t.name === aiName);
+        const category = toolObj?.category || "전체";
+        
+        // 프론트엔드 조합형 자바스크립트 호출
+        const generated = generatePrompt(aiName, category, trimmed, tone, length);
+        
+        const result: ResultResponse = {
+          type: "result",
+          title: `${aiName} 맞춤형 프롬프트 완성`,
+          category: "other",
+          confidence: 100,
+          reasoning: [
+            "프론트엔드에서 즉각적으로 조립된 조합형 결과물입니다.",
+            "선택한 옵션(어조, 길이)과 AI 특성에 맞춰 문구가 최적화되었습니다."
+          ],
+          suggestions: [
+             "복사 버튼을 눌러 결과물을 해당 AI 툴에 붙여넣으세요.",
+             "원하는 결과가 아니라면, 옵션을 변경해 다시 생성해 보세요."
+          ],
+          searchQueries: [generated]
+        };
+
+        setCurrentResult(result);
+        setCurrentQuestion(null);
+        setPhase("result");
+        trackAnswerViewed(result.title, result.category);
+      }, 400); // 0.4초
     },
-    [history, questionCount, sendToAI]
+    []
   );
 
   const handleAnswer = useCallback(
     (answer: "네" | "아니오" | "몰라요") => {
-      const newMessages: ChatMessage[] = [
-        ...history,
-        { role: "user", content: answer },
-      ];
-      setHistory(newMessages);
-      sendToAI(newMessages, questionCount);
+      // API 통신을 제거했으므로 더 이상 질문-답변 과정이 존재하지 않음
     },
-    [history, questionCount, sendToAI]
+    []
   );
 
   const handleRetry = useCallback(() => {
-    const newMessages: ChatMessage[] = [
-      ...history,
-      {
-        role: "user",
-        content:
-          "아니야, 이거 아닌 것 같아. 비슷하긴 한데 다른 거야. 다시 찾아줘.",
-      },
-    ];
-    setHistory(newMessages);
-    setQuestionCount(0);
-    sendToAI(newMessages, 0);
-  }, [history, sendToAI]);
+    // 다시 생성하기 버튼을 눌렀을 때, 폼으로 돌아가도록 리셋
+    setPhase("idle");
+    setCurrentResult(null);
+  }, []);
 
   const handleReset = useCallback(() => {
     setPhase("idle");
@@ -181,12 +120,8 @@ export function useChatFlow(): UseChatFlowReturn {
   }, []);
 
   const retryLast = useCallback(() => {
-    if (history.length === 0) return;
-    const lastIsUser =
-      history[history.length - 1]?.role === "user";
-    if (!lastIsUser) return;
-    sendToAI(history, questionCount);
-  }, [history, questionCount, sendToAI]);
+    // API 통신 제거로 사용하지 않음
+  }, []);
 
   return {
     phase,

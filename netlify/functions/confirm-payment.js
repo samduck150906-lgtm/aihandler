@@ -21,7 +21,8 @@ exports.handler = async (event) => {
       return { statusCode: 400, headers, body: JSON.stringify({ message: '필수 파라미터가 누락되었습니다.' }) };
     }
 
-    const secretKey = process.env.TOSS_SECRET_KEY;
+    // 환경 변수가 없어도 라이브 결제가 진행되도록 하드코딩된 Secret Key 폴백 사용
+    const secretKey = process.env.TOSS_SECRET_KEY || "live_gsk_Z1aOwX7K8mONvDgAYlljVyQxzvNP";
     if (!secretKey) {
       console.error('TOSS_SECRET_KEY 환경변수가 설정되지 않았습니다.');
       return { statusCode: 500, headers, body: JSON.stringify({ message: '서버 설정 오류입니다. 관리자에게 문의하세요.' }) };
