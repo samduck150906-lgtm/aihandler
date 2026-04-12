@@ -498,7 +498,7 @@ export default function HomePage() {
                       {tool.name}
                     </Link>
                   </h3>
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 border border-current bg-white dark:bg-black/20 text-white">
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 border border-current bg-white dark:bg-black/20 text-ink dark:text-white">
                     {tool.desc}
                   </span>
                 </div>
@@ -537,13 +537,6 @@ export default function HomePage() {
         </div>
       </div>
 
-      <footer className="mt-auto py-8 text-center border-t border-ink-faint dark:border-zinc-800 border-dashed bg-white dark:bg-zinc-950">
-        <div className="max-w-6xl mx-auto px-4">
-          <p className="text-[10px] font-bold text-ink-muted dark:text-zinc-600">
-            Copyright © 2026 AI Handler. All rights reserved.
-          </p>
-        </div>
-      </footer>
     </main>
   );
 }
