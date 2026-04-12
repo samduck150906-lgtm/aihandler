@@ -144,6 +144,21 @@ export default function HomePage() {
     handleSearch(selectedAI, purpose.trim(), tone, length);
   };
 
+  // Keyboard shortcut: Ctrl/Cmd + Enter to Submit
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        if (purpose.trim() && !isLoading && canGenerate) {
+          e.preventDefault();
+          onSubmit(e as any);
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [purpose, isLoading, canGenerate, selectedAI, tone, length]);
+
   const copyHistoryText = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -444,7 +459,7 @@ export default function HomePage() {
         </div>
 
         {/* Right Section: AI Tools Hub */}
-        <div className="lg:w-[380px] xl:w-[420px] shrink-0">
+        <div className="lg:w-[380px] xl:w-[420px] shrink-0 lg:sticky lg:top-24 lg:self-start max-h-[calc(100vh-120px)] overflow-y-auto pr-2">
           <div className="mb-4">
             <h2 className="text-xl md:text-2xl font-black text-ink dark:text-zinc-100 flex items-center gap-2">
               <LayoutTemplate className="w-5 h-5 text-brand-500" />
@@ -480,9 +495,9 @@ export default function HomePage() {
             ))}
           </div>
 
-          <div className="grid gap-4">
+          <div className="grid gap-4 pb-10">
             {filteredTools.map((tool) => (
-              <div key={tool.name} className="bg-white dark:bg-zinc-900 border-[2px] border-ink dark:border-zinc-700 shadow-[3px_3px_0px_#1f2937] dark:shadow-[3px_3px_0px_#000]">
+              <div key={tool.name} className="bg-white dark:bg-zinc-900 border-[2px] border-ink dark:border-zinc-700 shadow-[3px_3px_0px_#1f2937] dark:shadow-[3px_3px_0px_#000] hover:-translate-y-1 hover:shadow-[6px_6px_0px_#1f2937] dark:hover:shadow-[6px_6px_0px_#000] transition-all duration-200 group">
                 <div className={cn("px-4 py-2 flex justify-between items-center border-b-2 border-ink dark:border-zinc-800", tool.color)}>
                   <h3 className="font-black text-[15px]">
                     <Link href={`/tools/${tool.slug}`} className="hover:underline">
