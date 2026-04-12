@@ -45,13 +45,14 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: "/favicon.ico",
-    apple: "/favicon.ico",
+    apple: "/icon-512.png",
   },
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "AI Handler",
+    startupImage: ["/og-image.png"],
   },
   verification: {
     google: "M6tMtEGAXW6LN0_yZixeMGdZL5QrztsT8lkU0FQUZfw",
