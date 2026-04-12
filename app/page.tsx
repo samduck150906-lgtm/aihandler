@@ -69,15 +69,9 @@ export default function HomePage() {
       
       // Handle Toss Payments success
       const paymentStatus = params.get("payment");
-      const purchasedCoins = params.get("coins");
       
-      if (paymentStatus === "success" && purchasedCoins) {
-        // Prevent strict mode double execution effectively doing it twice
-        if (!window.sessionStorage.getItem('recharged_' + purchasedCoins)) {
-           addCoins(parseInt(purchasedCoins, 10));
-           window.sessionStorage.setItem('recharged_' + purchasedCoins, 'true');
-           toast.success(`${purchasedCoins} 코인이 충전되었습니다.`, { description: '이제 자유롭게 프롬프트 생성을 이어가세요!' });
-        }
+      if (paymentStatus === "completed") {
+        toast.success("코인이 성공적으로 충전되었습니다!", { description: '이제 자유롭게 프롬프트 생성을 이어가세요!' });
         window.history.replaceState({}, document.title, window.location.pathname);
       } else if (paymentStatus === "fail") {
         toast.error("결제가 취소되었거나 실패했습니다.");

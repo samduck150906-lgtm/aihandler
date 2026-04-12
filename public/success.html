@@ -81,6 +81,17 @@
         }
 
         function showSuccess(data) {
+            // 결제 즉시 로컬 코인 적립 (사용자가 창을 닫아도 적립되도록)
+            try {
+                const COINS_KEY = "prompt_maker_coins";
+                const currentCoins = parseInt(localStorage.getItem(COINS_KEY) || "0", 10);
+                const addedAmount = parseInt(customCoins, 10);
+                localStorage.setItem(COINS_KEY, (currentCoins + addedAmount).toString());
+                console.log("Coins recharged successfully:", addedAmount);
+            } catch (e) {
+                console.error("Failed to auto-recharge coins:", e);
+            }
+
             document.getElementById('status-icon').className = 'icon success';
             document.getElementById('status-icon').textContent = '✅';
             document.getElementById('status-title').textContent = '결제가 완료되었습니다!';
@@ -90,8 +101,9 @@
             box.innerHTML = '<div class="info-row"><span class="info-label">주문번호</span><span class="info-value">' + (data.orderId||orderId) + '</span></div>'
                 + '<div class="info-row"><span class="info-label">결제금액</span><span class="info-value">' + Number(amount).toLocaleString() + '원</span></div>'
                 + '<div class="info-row"><span class="info-label">결제수단</span><span class="info-value">' + (data.method||'-') + '</span></div>'
+                + '<div class="info-row"><span class="info-label">충전코인</span><span class="info-value text-emerald-600 font-black">💎 ' + customCoins + ' 코인 완료</span></div>'
                 + '<div class="info-row"><span class="info-label">승인일시</span><span class="info-value">' + new Date().toLocaleString('ko-KR') + '</span></div>';
-            document.getElementById('action-area').innerHTML = '<a href="/?payment=success&coins=' + customCoins + '" class="btn btn-primary">충전 완료 후 홈으로 이동</a>';
+            document.getElementById('action-area').innerHTML = '<a href="/?payment=completed" class="btn btn-primary">홈으로 돌아가기</a>';
         }
 
         function showError(msg) {
