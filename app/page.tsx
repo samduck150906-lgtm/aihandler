@@ -537,26 +537,11 @@ export default function HomePage() {
         </div>
       </div>
 
-      <footer className="mt-auto py-12 text-center border-t border-ink-faint dark:border-zinc-800 border-dashed bg-white dark:bg-zinc-950">
-        <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex flex-col text-left mb-2 md:mb-0">
-             <div className="flex items-center gap-2 mb-3">
-               <div className="w-6 h-6 bg-brand-500 flex items-center justify-center text-white"><Sparkles className="w-3 h-3" /></div>
-               <span className="font-black text-ink dark:text-zinc-100 text-lg">AI 핸들러</span>
-             </div>
-             <p className="text-[11px] font-bold text-ink-muted dark:text-zinc-500 mb-1 max-w-sm leading-tight group flex items-start gap-1">
-               <Info className="w-3 h-3 mt-0.5 shrink-0" />
-               국내 최초 4단계 맞춤형 프롬프트 생성 모델 및 글로벌 주요 제너레이티브 AI 마켓 서비스 직통 허브.
-             </p>
-          </div>
-          
-          <div className="text-[11px] text-left md:text-right font-bold text-ink-secondary dark:text-zinc-400 space-y-1.5 border-l-2 md:border-l-0 border-ink-faint md:border-r-2 dark:border-zinc-800 pl-4 md:pl-0 md:pr-4">
-            <p><span className="text-ink dark:text-zinc-300 mr-1.5 uppercase font-mono tracking-wider text-[9px]">Company</span> 이터널식스 (Eternal Six)</p>
-            <p><span className="text-ink dark:text-zinc-300 mr-1.5 uppercase font-mono tracking-wider text-[9px]">CEO</span> 성아름 <span className="text-ink dark:text-zinc-300 mx-2 text-[9px]">|</span> 개인사업자</p>
-            <p><span className="text-ink dark:text-zinc-300 mr-1.5 uppercase font-mono tracking-wider text-[9px]">Office</span> 경기도 수원시 영통구 삼성로186-1 4층</p>
-            <p><span className="text-ink dark:text-zinc-300 mr-1.5 uppercase font-mono tracking-wider text-[9px]">Contact</span> 010-8111-9370 <span className="text-ink dark:text-zinc-300 mx-2 text-[9px]">|</span> cinging1000@naver.com</p>
-            <p className="pt-2 text-[10px] text-ink-faint dark:text-zinc-600">Copyright © 2026 이터널식스 All rights reserved. AI Handler V5.</p>
-          </div>
+      <footer className="mt-auto py-8 text-center border-t border-ink-faint dark:border-zinc-800 border-dashed bg-white dark:bg-zinc-950">
+        <div className="max-w-6xl mx-auto px-4">
+          <p className="text-[10px] font-bold text-ink-muted dark:text-zinc-600">
+            Copyright © 2026 AI Handler. All rights reserved.
+          </p>
         </div>
       </footer>
     </main>
