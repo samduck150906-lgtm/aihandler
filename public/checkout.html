@@ -3,33 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>결제하기 | 이터널식스</title>
+    <title>코인 충전 결제 | 이터널식스</title>
     <script src="https://js.tosspayments.com/v1/payment-widget"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: #f3f4f6; padding: 20px; color: #111827; }
         .container { max-width: 600px; margin: 40px auto; background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         h1 { font-size: 24px; font-weight: bold; margin-bottom: 24px; text-align: center; }
-        .product-info { padding: 20px; background: #f9fafb; border-radius: 12px; margin-bottom: 24px; border: 1px solid #e5e7eb; }
-        .price { font-size: 20px; font-weight: bold; color: #3182ce; margin-top: 10px; }
+        
+        .product-selection { margin-bottom: 28px; }
+        .product-selection > .title { color:#4b5563; font-size:14px; margin-bottom:12px; font-weight:600; }
+        .product-option { display: block; margin-bottom: 10px; cursor: pointer; }
+        .product-option input[type="radio"] { display: none; }
+        .option-content { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: white; border: 2px solid #e5e7eb; border-radius: 12px; transition: all 0.2s; }
+        .product-option input[type="radio"]:checked + .option-content { border-color: #3182ce; background: #ebf8ff; box-shadow: 0 4px 6px -1px rgba(49, 130, 206, 0.1); }
+        .option-title { font-size: 16px; font-weight: 700; color: #111827; display: flex; align-items: center; gap: 8px; }
+        .option-price { font-size: 16px; font-weight: 700; color: #3182ce; }
+        .badge { font-size: 11px; padding: 3px 6px; border-radius: 6px; background: #e5e7eb; color: #4b5563; font-weight: 700; }
+        .badge.highlight { background: #fee2e2; color: #dc2626; }
+
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 6px; }
         .form-group input { width: 100%; padding: 12px 16px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s; }
         .form-group input:focus { border-color: #3182ce; box-shadow: 0 0 0 3px rgba(49,130,206,0.1); }
-        .pay-btn { display: block; width: 100%; background: #3182ce; color: white; border: none; padding: 16px; font-size: 18px; font-weight: bold; border-radius: 12px; cursor: pointer; margin-top: 20px; transition: background 0.2s; }
-        .pay-btn:hover { background: #2b6cb0; }
+        .pay-btn { display: block; width: 100%; background: #000; color: white; border: none; padding: 16px; font-size: 18px; font-weight: bold; border-radius: 12px; cursor: pointer; margin-top: 20px; transition: background 0.2s; }
+        .pay-btn:hover { background: #333; }
         .pay-btn:disabled { background: #9ca3af; cursor: not-allowed; }
         .footer { margin-top: 30px; font-size: 12px; color: #6b7280; text-align: center; line-height: 1.6; }
         .footer a { color: #4f46e5; text-decoration: none; }
+
+        @media (prefers-color-scheme: dark) {
+            body { background: #09090b; color: #fafafa; }
+            .container { background: #18181b; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.5); }
+            h1 { color: #fafafa; }
+            .product-selection > .title { color: #a1a1aa; }
+            .option-content { background: #18181b; border-color: #27272a; }
+            .option-title { color: #fafafa; }
+            .option-price { color: #60a5fa; }
+            .product-option input[type="radio"]:checked + .option-content { background: #27272a; border-color: #fafafa; box-shadow: inset 0 0 0 1px #fafafa; }
+            .badge { background: #27272a; color: #d4d4d8; }
+            .badge.highlight { background: #7f1d1d; color: #fecaca; }
+            .form-group label { color: #d4d4d8; }
+            .form-group input { background: #09090b; border-color: #27272a; color: #fafafa; }
+            .pay-btn { background: #fafafa; color: #000; }
+            .pay-btn:hover { background: #e4e4e7; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>간편 결제 (토스페이먼츠)</h1>
-        <div class="product-info">
-            <div style="color:#4b5563;font-size:14px;margin-bottom:8px;">주문 상품</div>
-            <div style="font-size:18px;font-weight:bold;">AI Handler 에이전시 컨설팅 기본 패키지</div>
-            <div class="price">5,000,000 원</div>
+        
+        <div class="product-selection">
+            <div class="title">충전할 코인 선택</div>
+            
+            <label class="product-option">
+                <input type="radio" name="product" value="300" data-coins="3" data-name="💎 3 코인 충전" checked>
+                <div class="option-content">
+                    <div class="option-title">💎 3 코인 <span class="badge">1회 분량</span></div>
+                    <div class="option-price">300 원</div>
+                </div>
+            </label>
+
+            <label class="product-option">
+                <input type="radio" name="product" value="3000" data-coins="33" data-name="💎 33 코인 충전">
+                <div class="option-content">
+                    <div class="option-title">💎 33 코인 <span class="badge highlight">+10% 보너스</span></div>
+                    <div class="option-price">3,000 원</div>
+                </div>
+            </label>
+
+            <label class="product-option">
+                <input type="radio" name="product" value="10000" data-coins="120" data-name="💎 120 코인 충전">
+                <div class="option-content">
+                    <div class="option-title">💎 120 코인 <span class="badge highlight">+20% 보너스</span></div>
+                    <div class="option-price">10,000 원</div>
+                </div>
+            </label>
+
+            <label class="product-option">
+                <input type="radio" name="product" value="30000" data-coins="400" data-name="💎 400 코인 충전">
+                <div class="option-content">
+                    <div class="option-title">💎 400 코인 <span class="badge highlight">+33% 보너스</span></div>
+                    <div class="option-price">30,000 원</div>
+                </div>
+            </label>
         </div>
 
         <div class="form-group">
@@ -62,28 +120,50 @@
         const clientKey = "live_gck_ZLKGPx4M3MpG0OOEvlW78BaWypv1";
         const customerKey = "cust_" + Math.random().toString(36).substring(2,12);
         const paymentWidget = PaymentWidget(clientKey, customerKey);
-        paymentWidget.renderPaymentMethods('#payment-method', { value: 5000000 });
+
+        let selectedPrice = 300;
+        let selectedCoins = 3;
+        let selectedOrderName = "💎 3 코인 충전";
+        
+        const paymentMethodWidget = paymentWidget.renderPaymentMethods('#payment-method', { value: selectedPrice });
         paymentWidget.renderAgreement('#agreement');
 
         const nameInput = document.getElementById('customer-name');
         const emailInput = document.getElementById('customer-email');
         const payBtn = document.getElementById('payment-button');
 
+        document.querySelectorAll('input[name="product"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                selectedPrice = Number(e.target.value);
+                selectedCoins = Number(e.target.dataset.coins);
+                selectedOrderName = e.target.dataset.name;
+                paymentMethodWidget.updateAmount(selectedPrice);
+                validateForm();
+            });
+        });
+
         function validateForm() {
             const valid = nameInput.value.trim().length >= 1 && /^[^@]+@[^@]+\.[^@]+$/.test(emailInput.value.trim());
             payBtn.disabled = !valid;
-            payBtn.textContent = valid ? '5,000,000원 결제하기' : '주문자 정보를 입력하세요';
+            payBtn.textContent = valid ? `${selectedPrice.toLocaleString()}원 결제하기` : '주문자 정보를 입력하세요';
         }
+        
         nameInput.addEventListener('input', validateForm);
         emailInput.addEventListener('input', validateForm);
 
         payBtn.addEventListener('click', () => {
             payBtn.disabled = true;
             payBtn.textContent = '결제 처리 중...';
+            
+            // Generate a unique success URL embedding the purchased coins
+            const successRawUrl = window.location.origin + "/success.html";
+            const successUrl = new URL(successRawUrl);
+            successUrl.searchParams.set("customCoins", selectedCoins); // Pass as custom param so Toss doesn't strip it or we just read it on success.html
+            
             paymentWidget.requestPayment({
                 orderId: "ORD_" + Date.now() + "_" + Math.random().toString(36).substring(2,8),
-                orderName: "AI Handler 에이전시 컨설팅 기본 패키지",
-                successUrl: window.location.origin + "/success.html",
+                orderName: selectedOrderName,
+                successUrl: successUrl.toString(),
                 failUrl: window.location.origin + "/fail.html",
                 customerEmail: emailInput.value.trim(),
                 customerName: nameInput.value.trim(),

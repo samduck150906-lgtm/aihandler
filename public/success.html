@@ -24,6 +24,19 @@
         .btn-primary { background: #4f46e5; color: white; }
         .btn-primary:hover { background: #4338ca; }
         .footer { margin-top: 32px; font-size: 11px; color: #9ca3af; line-height: 1.5; }
+
+        @media (prefers-color-scheme: dark) {
+            body { background: #09090b; color: #fafafa; }
+            .card { background: #18181b; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+            h1 { color: #fafafa; }
+            .desc { color: #a1a1aa; }
+            .info-box { background: #09090b; border-color: #27272a; }
+            .info-row { border-bottom-color: #27272a; }
+            .info-label { color: #a1a1aa; }
+            .info-value { color: #fafafa; }
+            .btn-primary { background: #fafafa; color: #000; }
+            .btn-primary:hover { background: #e4e4e7; }
+        }
     </style>
 </head>
 <body>
@@ -43,6 +56,7 @@
         const paymentKey = params.get('paymentKey');
         const orderId = params.get('orderId');
         const amount = params.get('amount');
+        const customCoins = params.get('customCoins') || '3';
 
         async function confirmPayment() {
             if (!paymentKey || !orderId || !amount) {
@@ -77,7 +91,7 @@
                 + '<div class="info-row"><span class="info-label">결제금액</span><span class="info-value">' + Number(amount).toLocaleString() + '원</span></div>'
                 + '<div class="info-row"><span class="info-label">결제수단</span><span class="info-value">' + (data.method||'-') + '</span></div>'
                 + '<div class="info-row"><span class="info-label">승인일시</span><span class="info-value">' + new Date().toLocaleString('ko-KR') + '</span></div>';
-            document.getElementById('action-area').innerHTML = '<a href="/" class="btn btn-primary">홈으로 돌아가기</a>';
+            document.getElementById('action-area').innerHTML = '<a href="/?payment=success&coins=' + customCoins + '" class="btn btn-primary">충전 완료 후 홈으로 이동</a>';
         }
 
         function showError(msg) {

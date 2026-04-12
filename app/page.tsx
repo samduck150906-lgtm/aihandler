@@ -2,14 +2,14 @@
 
 import { useRef, useEffect, useState, useMemo } from "react";
 import { useTheme } from "next-themes";
-import { RotateCcw, Sparkles, Zap, ExternalLink, CreditCard, UserX, LayoutTemplate, Sun, Moon, History, Trash2, Search, Info } from "lucide-react";
+import { RotateCcw, Sparkles, Zap, ExternalLink, CreditCard, UserX, LayoutTemplate, Sun, Moon, History, Trash2, Search, Info, UserCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useChatFlow } from "@/hooks/useChatFlow";
 import { usePromptHistory } from "@/hooks/usePromptHistory";
-import { useFreemium, MAX_FREE_LIMIT } from "@/hooks/useFreemium";
+import { useFreemium, MAX_FREE_LIMIT, COST_PER_GENERATION } from "@/hooks/useFreemium";
 import { PromptResult } from "@/components/prompt-result";
 import { Skeleton } from "@/components/skeleton";
-
+import { toast } from "sonner";
 
 import Link from "next/link";
 import { AI_TOOLS, type Category } from "@/lib/data/ai-tools";
@@ -36,7 +36,7 @@ export default function HomePage() {
   } = useChatFlow();
 
   const { history, savePrompt, removePrompt, clearHistory } = usePromptHistory();
-  const { usageCount, isPremium, isLoaded, canGenerate, incrementUsage, unlockPremium } = useFreemium();
+  const { usageCount, coins, isAdmin, isLoaded, canGenerate, incrementUsage, addCoins, verifyAdmin } = useFreemium();
 
 
 
@@ -45,6 +45,12 @@ export default function HomePage() {
     if (phase === "result" && currentResult) {
       savePrompt(currentResult);
       incrementUsage();
+      toast.success(
+        <div>
+           <p className="font-bold">프롬프트 조립 완료!</p>
+           {!isAdmin && usageCount >= MAX_FREE_LIMIT && <p className="text-xs text-muted-foreground mt-1 text-rose-500 font-mono">- {COST_PER_GENERATION} 코인 차감 💎</p>}
+        </div>
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, currentResult]);
@@ -63,12 +69,18 @@ export default function HomePage() {
       
       // Handle Toss Payments success
       const paymentStatus = params.get("payment");
-      if (paymentStatus === "success") {
-        unlockPremium();
-        alert("프리미엄 결제가 완료되었습니다! 이제 AI 핸들러를 무제한으로 자유롭게 이용해 보세요.");
+      const purchasedCoins = params.get("coins");
+      
+      if (paymentStatus === "success" && purchasedCoins) {
+        // Prevent strict mode double execution effectively doing it twice
+        if (!window.sessionStorage.getItem('recharged_' + purchasedCoins)) {
+           addCoins(parseInt(purchasedCoins, 10));
+           window.sessionStorage.setItem('recharged_' + purchasedCoins, 'true');
+           toast.success(`${purchasedCoins} 코인이 충전되었습니다.`, { description: '이제 자유롭게 프롬프트 생성을 이어가세요!' });
+        }
         window.history.replaceState({}, document.title, window.location.pathname);
       } else if (paymentStatus === "fail") {
-        alert("결제가 취소되었거나 실패했습니다.");
+        toast.error("결제가 취소되었거나 실패했습니다.");
         window.history.replaceState({}, document.title, window.location.pathname);
       }
 
@@ -82,7 +94,18 @@ export default function HomePage() {
         }
       }
     }
-  }, [unlockPremium]);
+  }, []);
+  
+  const handleAdminVerify = () => {
+    const email = window.prompt("스태프/관리자 인증: 등록된 이메일을 입력하세요.");
+    if (email) {
+      if (verifyAdmin(email)) {
+        toast.success("관리자 계정 인증 완료!", { description: '코인 차감 없이 평생 무료 사용이 가능합니다.' });
+      } else {
+        toast.error("등록되지 않은 이메일입니다.");
+      }
+    }
+  };
   
   // Link Hub State
   const [activeCategory, setActiveCategory] = useState<Category>("전체");
@@ -124,9 +147,9 @@ export default function HomePage() {
   const copyHistoryText = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      alert("복사되었습니다.");
+      toast.success("클립보드에 복사되었습니다.");
     } catch {
-      // ignore
+      toast.error("복사에 실패했습니다.");
     }
   };
 
@@ -145,20 +168,20 @@ export default function HomePage() {
             <div className="w-8 h-8 bg-brand-500 border-[2px] border-ink dark:border-black flex items-center justify-center text-white font-black group-hover:bg-brand-600 transition-colors shadow-[2px_2px_0px_#1f2937] dark:shadow-[2px_2px_0px_#000]">
               <Sparkles className="w-4 h-4 fill-white" />
             </div>
-            <div className="flex flex-col text-left">
-              <span className="text-[15px] font-black tracking-tight leading-none text-ink dark:text-zinc-100">
+            <div className="flex flex-col text-left" onDoubleClick={handleAdminVerify}>
+              <span className="text-[15px] font-black tracking-tight leading-none text-ink dark:text-zinc-100 cursor-default">
                 AI Handler
               </span>
-              <span className="text-[9px] font-mono text-ink-muted dark:text-zinc-400 tracking-wide mt-0.5">
+              <span className="text-[9px] font-mono text-ink-muted dark:text-zinc-400 tracking-wide mt-0.5 cursor-default">
                 AI 핸들러
               </span>
             </div>
           </button>
 
           <div className="flex items-center gap-3">
-            {isLoaded && isPremium && (
+            {isLoaded && isAdmin && (
                <span className="hidden sm:inline-block px-2 py-0.5 bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800 text-[10px] font-black uppercase tracking-widest rounded-full">
-                 PRO ⚡
+                 ADMIN ⚡
                </span>
             )}
             {isActive && (
@@ -287,11 +310,11 @@ export default function HomePage() {
                 {/* Freemium Progress Bar */}
                 {isLoaded && (
                   <div className="mb-4">
-                    {isPremium ? (
+                    {isAdmin ? (
                       <div className="text-center bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-300 text-xs font-bold py-2 border border-brand-200 dark:border-brand-800/50">
-                        ✨ 무제한 프리미엄 활성화
+                        ✨ 관리자 무제한 사용 활성화
                       </div>
-                    ) : (
+                    ) : usageCount < MAX_FREE_LIMIT ? (
                       <div className="flex items-center gap-3 bg-surface-muted dark:bg-zinc-950 p-3 border-[2px] border-ink-faint dark:border-zinc-800">
                         <div className="text-[11px] font-black uppercase text-ink dark:text-zinc-300 whitespace-nowrap tracking-wide">
                           남은 무료 횟수: <span className="text-brand-600 dark:text-brand-400 ml-1">{Math.max(0, MAX_FREE_LIMIT - usageCount)} / {MAX_FREE_LIMIT}</span>
@@ -302,9 +325,16 @@ export default function HomePage() {
                             style={{ width: `${(usageCount / MAX_FREE_LIMIT) * 100}%` }}
                           />
                         </div>
-                        {usageCount >= MAX_FREE_LIMIT && (
-                           <a href="/checkout.html" className="text-[10px] font-bold text-white bg-ink dark:bg-zinc-300 dark:text-zinc-900 px-2.5 py-1 rounded">제한 해제</a>
-                        )}
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between bg-surface-muted dark:bg-zinc-950 p-3 border-[2px] border-ink-faint dark:border-zinc-800">
+                        <div className="text-[11px] font-black tracking-wide uppercase text-ink dark:text-zinc-300 whitespace-nowrap flex items-center">
+                          보유 코인: <span className="text-brand-600 dark:text-brand-400 ml-1 mr-2 text-sm">💎 {coins}</span>
+                          <span className="text-ink-muted dark:text-zinc-500 text-[10px]">(1회 = {COST_PER_GENERATION}코인 차감)</span>
+                        </div>
+                        <a href="/checkout.html" className="text-[10px] sm:text-xs font-black text-white bg-ink dark:bg-zinc-300 dark:text-zinc-900 px-3 py-1.5 border-[2px] border-ink dark:border-black rounded-none shadow-[2px_2px_0px_#1f2937] dark:shadow-[2px_2px_0px_#000] hover:bg-brand-500 hover:text-white transition-colors uppercase">
+                           코인 충전 ⚡
+                        </a>
                       </div>
                     )}
                   </div>
@@ -325,7 +355,12 @@ export default function HomePage() {
                       <Sparkles className="w-5 h-5" /> 전문 프레임워크 조립 중...
                     </span>
                   ) : (
-                    "프롬프트 자동 조립 🚀"
+                    <span>
+                      프롬프트 자동 조립 🚀
+                      {isLoaded && !isAdmin && usageCount >= MAX_FREE_LIMIT && (
+                        <span className="text-[10px] ml-2 text-rose-600 dark:text-rose-400">(-{COST_PER_GENERATION} 코인)</span>
+                      )}
+                    </span>
                   )}
                 </button>
               </form>

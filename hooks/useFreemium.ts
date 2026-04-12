@@ -3,24 +3,38 @@
 import { useState, useEffect } from "react";
 
 const USAGE_KEY = "prompt_maker_usage";
-const PREMIUM_KEY = "prompt_maker_premium";
+const COINS_KEY = "prompt_maker_coins";
+const ADMIN_KEY = "prompt_maker_admin";
+
 export const MAX_FREE_LIMIT = 3;
+export const COST_PER_GENERATION = 3;
+
+// 하드코딩된 관리자 계정 목록 (영구 무료 허용)
+const ADMIN_EMAILS = [
+  "samduck150906@gmail.com",
+  "ceo@eternalsix.kr"
+];
 
 export function useFreemium() {
   const [usageCount, setUsageCount] = useState<number>(0);
-  const [isPremium, setIsPremium] = useState<boolean>(false);
+  const [coins, setCoins] = useState<number>(0);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     try {
       const storedUsage = localStorage.getItem(USAGE_KEY);
-      const storedPremium = localStorage.getItem(PREMIUM_KEY);
+      const storedCoins = localStorage.getItem(COINS_KEY);
+      const storedAdmin = localStorage.getItem(ADMIN_KEY);
       
       if (storedUsage) {
         setUsageCount(parseInt(storedUsage, 10));
       }
-      if (storedPremium === "true") {
-        setIsPremium(true);
+      if (storedCoins) {
+        setCoins(parseInt(storedCoins, 10));
+      }
+      if (storedAdmin === "true") {
+        setIsAdmin(true);
       }
     } catch (e) {
       console.error("Failed to read freemium state", e);
@@ -29,35 +43,44 @@ export function useFreemium() {
   }, []);
 
   const incrementUsage = () => {
-    if (isPremium) return;
-    setUsageCount((prev) => {
-      const next = prev + 1;
-      try {
-        localStorage.setItem(USAGE_KEY, next.toString());
-      } catch (e) {
-        console.error("Failed to save usage count", e);
-      }
-      return next;
-    });
-  };
+    if (isAdmin) return;
 
-  const unlockPremium = () => {
-    setIsPremium(true);
-    try {
-      localStorage.setItem(PREMIUM_KEY, "true");
-    } catch (e) {
-      console.error("Failed to save premium state", e);
+    if (usageCount < MAX_FREE_LIMIT) {
+      const next = usageCount + 1;
+      setUsageCount(next);
+      try { localStorage.setItem(USAGE_KEY, next.toString()); } catch (e) {}
+    } else if (coins >= COST_PER_GENERATION) {
+      const nextCoins = coins - COST_PER_GENERATION;
+      setCoins(nextCoins);
+      try { localStorage.setItem(COINS_KEY, nextCoins.toString()); } catch (e) {}
     }
   };
 
-  const canGenerate = isPremium || usageCount < MAX_FREE_LIMIT;
+  const addCoins = (amount: number) => {
+    const nextCoins = coins + amount;
+    setCoins(nextCoins);
+    try { localStorage.setItem(COINS_KEY, nextCoins.toString()); } catch (e) {}
+  };
+
+  const verifyAdmin = (email: string) => {
+    if (ADMIN_EMAILS.includes(email.trim().toLowerCase())) {
+      setIsAdmin(true);
+      try { localStorage.setItem(ADMIN_KEY, "true"); } catch (e) {}
+      return true;
+    }
+    return false;
+  };
+
+  const canGenerate = isAdmin || usageCount < MAX_FREE_LIMIT || coins >= COST_PER_GENERATION;
 
   return {
     usageCount,
-    isPremium,
+    coins,
+    isAdmin,
     isLoaded,
     canGenerate,
     incrementUsage,
-    unlockPremium,
+    addCoins,
+    verifyAdmin,
   };
 }
