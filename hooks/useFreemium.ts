@@ -130,6 +130,22 @@ export function useFreemium() {
     });
   };
 
+  const loginWithEmail = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+  };
+
+  const signUpWithEmail = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signUp({ 
+      email, 
+      password,
+      options: {
+        emailRedirectTo: window.location.origin
+      }
+    });
+    if (error) throw error;
+  };
+
   const logout = async () => {
     await supabase.auth.signOut();
   };
@@ -144,6 +160,8 @@ export function useFreemium() {
     incrementUsage,
     addCoins,
     loginWithGoogle,
+    loginWithEmail,
+    signUpWithEmail,
     logout,
     isSignedIn: !!session?.user,
     userId: session?.user?.id
