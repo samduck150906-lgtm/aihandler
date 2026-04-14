@@ -54,16 +54,16 @@ export function useFreemium() {
   useEffect(() => {
     async function syncData() {
       if (session?.user) {
-        // Fetch from Supabase
-        const { data, error } = await supabase
+        // Fetch from Supabase (using snake_case column names per Postgres convention)
+        const { data } = await supabase
           .from('profiles')
-          .select('coins, usageCount') // I added usageCount to table in migration
+          .select('coins, usage_count')
           .eq('id', session.user.id)
           .single();
 
         if (data) {
           setCoins(data.coins || 0);
-          setUsageCount(data.usageCount || 0);
+          setUsageCount(data.usage_count || 0);
         }
       } else {
         // Load from LocalStorage for Guests
@@ -96,10 +96,10 @@ export function useFreemium() {
     }
 
     if (session?.user) {
-      // Update Supabase
+      // Update Supabase (snake_case column names)
       await supabase
         .from('profiles')
-        .update({ coins: nextCoins, usageCount: nextUsage })
+        .update({ coins: nextCoins, usage_count: nextUsage })
         .eq('id', session.user.id);
     } else {
       // Update LocalStorage

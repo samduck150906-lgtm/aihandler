@@ -140,7 +140,7 @@
                 emailInput.value = emailParam;
             }
             if (userIdParam) {
-                window.clerkUserId = userIdParam; // Store for success URL
+                window.supabaseUserId = userIdParam; // Store Supabase user ID for success URL
             }
             validateForm();
         });
@@ -172,8 +172,8 @@
             const successRawUrl = window.location.origin + "/success.html";
             const successUrl = new URL(successRawUrl);
             successUrl.searchParams.set("customCoins", selectedCoins);
-            if (window.clerkUserId) {
-                successUrl.searchParams.set("userId", window.clerkUserId);
+            if (window.supabaseUserId) {
+                successUrl.searchParams.set("userId", window.supabaseUserId);
             }
             
             paymentWidget.requestPayment({

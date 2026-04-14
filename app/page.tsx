@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState, useMemo } from "react";
 import { useTheme } from "next-themes";
-import { RotateCcw, Sparkles, Zap, ExternalLink, CreditCard, UserX, LayoutTemplate, Sun, Moon, History, Trash2, Search, Info, UserCircle, LogIn } from "lucide-react";
+import { RotateCcw, Sparkles, Zap, ExternalLink, CreditCard, UserX, LayoutTemplate, Sun, Moon, History, Trash2, Search, LogIn, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useChatFlow } from "@/hooks/useChatFlow";
 import { usePromptHistory } from "@/hooks/usePromptHistory";
@@ -36,11 +36,61 @@ export default function HomePage() {
   } = useChatFlow();
 
   const { history, savePrompt, removePrompt, clearHistory } = usePromptHistory();
-  const { usageCount, coins, isAdmin, userEmail, userId, isLoaded, canGenerate, incrementUsage, addCoins, verifyAdmin } = useFreemium();
+  const {
+    usageCount,
+    coins,
+    isAdmin,
+    userEmail,
+    userId,
+    isLoaded,
+    canGenerate,
+    incrementUsage,
+    loginWithGoogle,
+    loginWithEmail,
+    signUpWithEmail,
+    logout,
+    isSignedIn,
+  } = useFreemium();
 
+  // Auth Modal State
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [isAuthLoading, setIsAuthLoading] = useState(false);
 
+  const handleAuthSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsAuthLoading(true);
+    try {
+      if (authMode === 'login') {
+        await loginWithEmail(authEmail, authPassword);
+        toast.success("로그인 성공!");
+      } else {
+        await signUpWithEmail(authEmail, authPassword);
+        toast.success("인증 메일이 발송되었습니다. 메일함을 확인해주세요!", { duration: 5000 });
+      }
+      setIsAuthModalOpen(false);
+      setAuthEmail("");
+      setAuthPassword("");
+    } catch (error: any) {
+      const msg = error?.message || "인증에 실패했습니다.";
+      if (msg.includes("Invalid login credentials")) {
+        toast.error("이메일 또는 비밀번호가 올바르지 않습니다.");
+      } else if (msg.includes("User already registered")) {
+        toast.error("이미 가입된 이메일입니다. 로그인해 주세요.");
+        setAuthMode('login');
+      } else if (msg.includes("Password should be at least")) {
+        toast.error("비밀번호는 6자 이상이어야 합니다.");
+      } else {
+        toast.error(msg);
+      }
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
 
-  // Save history and increment usage when a beautiful new response arrives
+  // Save history and increment usage when a new response arrives
   useEffect(() => {
     if (phase === "result" && currentResult) {
       savePrompt(currentResult);
@@ -91,14 +141,8 @@ export default function HomePage() {
   }, []);
   
   const handleAdminVerify = () => {
-    const email = window.prompt("스태프/관리자 인증: 등록된 이메일을 입력하세요.");
-    if (email) {
-      if (verifyAdmin(email)) {
-        toast.success("관리자 계정 인증 완료!", { description: '코인 차감 없이 평생 무료 사용이 가능합니다.' });
-      } else {
-        toast.error("등록되지 않은 이메일입니다.");
-      }
-    }
+    // Hidden admin verify via double-click on logo text
+    // Admin accounts are determined by email in useFreemium
   };
   
   // Link Hub State
@@ -129,12 +173,17 @@ export default function HomePage() {
     
     // Check Freemium Limitation
     if (!canGenerate) {
-      window.location.href = '/checkout.html';
+      // Prompt login if not signed in
+      if (!isSignedIn) {
+        setIsAuthModalOpen(true);
+        toast.info("로그인 후 코인을 충전하시면 계속 사용할 수 있습니다.", { duration: 4000 });
+      } else {
+        window.location.href = `/checkout.html?email=${encodeURIComponent(userEmail)}&userId=${encodeURIComponent(userId || "")}`;
+      }
       return;
     }
 
     clearError();
-    // 프론트엔드 자동 조립 로직으로 전달 (API 통신 제거)
     handleSearch(selectedAI, purpose.trim(), tone, length);
   };
 
@@ -168,7 +217,7 @@ export default function HomePage() {
       {isAuthModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsAuthModalOpen(false)} />
-           <div className="relative w-full max-w-md bg-white dark:bg-zinc-900 border-[3px] border-ink dark:border-zinc-700 shadow-[8px_8px_0px_#000] p-6 animate-in fade-in zoom-in duration-200">
+           <div className="relative w-full max-w-md bg-white dark:bg-zinc-900 border-[3px] border-ink dark:border-zinc-700 shadow-[8px_8px_0px_#000] p-6">
               <div className="flex justify-between items-center mb-6">
                  <h2 className="text-xl font-black text-ink dark:text-white uppercase tracking-tighter">
                     {authMode === 'login' ? 'Welcome Back' : 'Create Account'}
@@ -180,8 +229,8 @@ export default function HomePage() {
 
               <div className="space-y-4">
                  <button 
-                  onClick={loginWithGoogle}
-                  className="w-full flex items-center justify-center gap-3 py-3 border-[2px] border-ink dark:border-zinc-700 font-bold hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                  onClick={() => { loginWithGoogle(); }}
+                  className="w-full flex items-center justify-center gap-3 py-3 border-[2px] border-ink dark:border-zinc-700 font-bold hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-ink dark:text-zinc-200"
                  >
                     <svg className="w-5 h-5" viewBox="0 0 24 24">
                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -194,36 +243,37 @@ export default function HomePage() {
 
                  <div className="relative">
                     <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-zinc-200 dark:border-zinc-800"></div></div>
-                    <div className="relative flex justify-center text-xs uppercase"><span className="bg-white dark:bg-zinc-900 px-2 text-zinc-500">Or continue with email</span></div>
+                    <div className="relative flex justify-center text-xs uppercase"><span className="bg-white dark:bg-zinc-900 px-2 text-zinc-500">이메일로 계속하기</span></div>
                  </div>
 
-                 <form onSubmit={handleAuthSubmit} className="space-y-4">
+                 <form onSubmit={handleAuthSubmit} className="space-y-3">
                     <div>
-                       <label className="block text-xs font-black uppercase text-ink-muted dark:text-zinc-500 mb-1">Email</label>
+                       <label className="block text-xs font-black uppercase text-ink-muted dark:text-zinc-500 mb-1">이메일</label>
                        <input 
                         type="email" 
                         required
                         value={authEmail}
                         onChange={(e) => setAuthEmail(e.target.value)}
-                        className="w-full border-[2px] border-ink dark:border-zinc-700 bg-white dark:bg-zinc-800 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-ink"
+                        className="w-full border-[2px] border-ink dark:border-zinc-700 bg-white dark:bg-zinc-800 dark:text-zinc-100 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                         placeholder="example@email.com"
                        />
                     </div>
                     <div>
-                       <label className="block text-xs font-black uppercase text-ink-muted dark:text-zinc-500 mb-1">Password</label>
+                       <label className="block text-xs font-black uppercase text-ink-muted dark:text-zinc-500 mb-1">비밀번호 (6자 이상)</label>
                        <input 
                         type="password" 
                         required
+                        minLength={6}
                         value={authPassword}
                         onChange={(e) => setAuthPassword(e.target.value)}
-                        className="w-full border-[2px] border-ink dark:border-zinc-700 bg-white dark:bg-zinc-800 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-ink"
+                        className="w-full border-[2px] border-ink dark:border-zinc-700 bg-white dark:bg-zinc-800 dark:text-zinc-100 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                         placeholder="••••••••"
                        />
                     </div>
                     <button 
                       type="submit"
                       disabled={isAuthLoading}
-                      className="w-full py-3 bg-ink text-white dark:bg-white dark:text-zinc-900 font-black hover:bg-brand-500 hover:text-white transition-colors flex items-center justify-center gap-2"
+                      className="w-full py-3 bg-ink text-white dark:bg-white dark:text-zinc-900 font-black hover:bg-brand-500 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                        {isAuthLoading ? "처리 중..." : (authMode === 'login' ? '로그인' : '회원가입')}
                     </button>
@@ -232,12 +282,19 @@ export default function HomePage() {
                  <p className="text-center text-xs text-ink-muted dark:text-zinc-500">
                     {authMode === 'login' ? "계정이 없으신가요?" : "이미 계정이 있으신가요?"}
                     <button 
+                      type="button"
                       onClick={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')}
                       className="ml-1 font-bold text-brand-600 hover:underline"
                     >
                        {authMode === 'login' ? '회원가입' : '로그인'}
                     </button>
                  </p>
+
+                 {authMode === 'signup' && (
+                   <p className="text-center text-[10px] text-zinc-400 leading-relaxed">
+                     가입 시 <a href="/terms.html" className="underline">이용약관</a> 및 <a href="/privacy.html" className="underline">개인정보처리방침</a>에 동의하는 것으로 간주됩니다.
+                   </p>
+                 )}
               </div>
            </div>
         </div>
@@ -302,7 +359,7 @@ export default function HomePage() {
                 </button>
               ) : (
                 <div className="flex items-center gap-2">
-                   <span className="hidden md:block text-[10px] font-mono text-ink-muted dark:text-zinc-400 max-w-[100px] truncate">{userEmail}</span>
+                   <span className="hidden md:block text-[10px] font-mono text-ink-muted dark:text-zinc-400 max-w-[120px] truncate">{userEmail}</span>
                    <button 
                     onClick={logout}
                     className="p-2 border-[2px] border-ink dark:border-zinc-700 bg-white dark:bg-zinc-800 text-ink dark:text-zinc-200 hover:bg-red-50 dark:hover:bg-red-900/20 active:translate-y-[1px] shadow-[2px_2px_0px_#1f2937] dark:shadow-[2px_2px_0px_#000]"
@@ -435,21 +492,41 @@ export default function HomePage() {
                           />
                         </div>
                       </div>
-                    ) : (
+                    ) : coins > 0 ? (
                       <div className="flex items-center justify-between bg-surface-muted dark:bg-zinc-950 p-3 border-[2px] border-ink-faint dark:border-zinc-800">
                         <div className="text-[11px] font-black tracking-wide uppercase text-ink dark:text-zinc-300 whitespace-nowrap flex items-center">
                           보유 코인: <span className="text-brand-600 dark:text-brand-400 ml-1 mr-2 text-sm">💎 {coins}</span>
                           <span className="text-ink-muted dark:text-zinc-500 text-[10px]">(1회 = {COST_PER_GENERATION}코인 차감)</span>
                         </div>
                         <a 
-                          href={`/checkout.html?${new URLSearchParams({
-                            email: userEmail || "",
-                            userId: userId || ""
-                          }).toString()}`} 
+                          href={`/checkout.html?email=${encodeURIComponent(userEmail)}&userId=${encodeURIComponent(userId || "")}`}
                           className="text-[10px] sm:text-xs font-black text-white bg-ink dark:bg-zinc-300 dark:text-zinc-900 px-3 py-1.5 border-[2px] border-ink dark:border-black rounded-none shadow-[2px_2px_0px_#1f2937] dark:shadow-[2px_2px_0px_#000] hover:bg-brand-500 hover:text-white transition-colors uppercase"
                         >
                            코인 충전 ⚡
                         </a>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between bg-rose-50 dark:bg-rose-950/30 p-3 border-[2px] border-rose-300 dark:border-rose-800">
+                        <div className="text-[11px] font-black text-rose-700 dark:text-rose-400">
+                          무료 횟수를 모두 사용했습니다. 코인을 충전하거나 로그인하세요.
+                        </div>
+                        <div className="flex gap-2">
+                          {!isSignedIn && (
+                            <button
+                              type="button"
+                              onClick={() => setIsAuthModalOpen(true)}
+                              className="text-[10px] font-black text-white bg-brand-500 px-3 py-1.5 hover:bg-brand-600 transition-colors"
+                            >
+                              로그인
+                            </button>
+                          )}
+                          <a 
+                            href={`/checkout.html?email=${encodeURIComponent(userEmail)}&userId=${encodeURIComponent(userId || "")}`}
+                            className="text-[10px] font-black text-white bg-ink dark:bg-zinc-300 dark:text-zinc-900 px-3 py-1.5 hover:bg-brand-500 hover:text-white transition-colors"
+                          >
+                             충전 ⚡
+                          </a>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -472,7 +549,7 @@ export default function HomePage() {
                   ) : (
                     <span>
                       프롬프트 자동 조립 🚀
-                      {isLoaded && !isAdmin && usageCount >= MAX_FREE_LIMIT && (
+                      {isLoaded && !isAdmin && usageCount >= MAX_FREE_LIMIT && coins > 0 && (
                         <span className="text-[10px] ml-2 text-rose-600 dark:text-rose-400">(-{COST_PER_GENERATION} 코인)</span>
                       )}
                     </span>
