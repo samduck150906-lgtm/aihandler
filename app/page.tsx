@@ -216,24 +216,26 @@ export default function HomePage() {
             )}
 
             <div className="flex items-center ml-1 border-l pl-3 dark:border-zinc-800">
-              <SignedOut>
-                <SignInButton mode="modal">
-                  <button className="flex items-center gap-1.5 px-3 py-1.5 bg-ink text-white dark:bg-zinc-100 dark:text-zinc-900 text-xs font-bold hover:bg-brand-500 transition-colors shadow-[2px_2px_0px_#1f2937] dark:shadow-[2px_2px_0px_#000]">
-                    <LogIn className="w-3.5 h-3.5" />
-                    로그인
+              {!isSignedIn ? (
+                <button 
+                  onClick={loginWithGoogle}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-ink text-white dark:bg-zinc-100 dark:text-zinc-900 text-xs font-bold hover:bg-brand-500 transition-colors shadow-[2px_2px_0px_#1f2937] dark:shadow-[2px_2px_0px_#000]"
+                >
+                  <LogIn className="w-3.5 h-3.5" />
+                  로그인
+                </button>
+              ) : (
+                <div className="flex items-center gap-2">
+                   <span className="hidden md:block text-[10px] font-mono text-ink-muted dark:text-zinc-400 max-w-[100px] truncate">{userEmail}</span>
+                   <button 
+                    onClick={logout}
+                    className="p-2 border-[2px] border-ink dark:border-zinc-700 bg-white dark:bg-zinc-800 text-ink dark:text-zinc-200 hover:bg-red-50 dark:hover:bg-red-900/20 active:translate-y-[1px] shadow-[2px_2px_0px_#1f2937] dark:shadow-[2px_2px_0px_#000]"
+                    title="로그아웃"
+                  >
+                    <LogOut className="w-4 h-4" />
                   </button>
-                </SignInButton>
-              </SignedOut>
-              <SignedIn>
-                <UserButton 
-                  appearance={{
-                    elements: {
-                      userButtonAvatarBox: "w-8 h-8 border-2 border-ink dark:border-zinc-700 rounded-none",
-                      userButtonTrigger: "focus:shadow-none focus:ring-0"
-                    }
-                  }}
-                />
-              </SignedIn>
+                </div>
+              )}
             </div>
           </div>
         </div>

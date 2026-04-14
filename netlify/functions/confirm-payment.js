@@ -1,5 +1,5 @@
 // 토스페이먼츠 결제 승인 서버사이드 함수 (Netlify Functions)
-const { createClerkClient } = require("@clerk/backend");
+const { createClient } = require("@supabase/supabase-js");
 
 exports.handler = async (event) => {
   const headers = {
@@ -47,27 +47,34 @@ exports.handler = async (event) => {
       };
     }
 
-    // 결제 승인 성공 시, Clerk 유저 메타데이터에 코인 추가 (Cloud Recharge)
+    // 결제 승인 성공 시, Supabase DB에 코인 추가 (Cloud Recharge)
     if (userId && coins) {
         try {
-            const clerkSecretKey = process.env.CLERK_SECRET_KEY;
-            if (clerkSecretKey) {
-                const clerkClient = createClerkClient({ secretKey: clerkSecretKey });
-                const user = await clerkClient.users.getUser(userId);
-                const currentCoins = Number(user.publicMetadata.coins || 0);
+            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+            const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+            
+            if (supabaseUrl && supabaseServiceRoleKey) {
+                const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
                 
-                await clerkClient.users.updateUserMetadata(userId, {
-                    publicMetadata: {
-                        coins: currentCoins + Number(coins)
-                    }
-                });
-                console.log(`Clerk Cloud Recharge Success: User ${userId}, +${coins} coins`);
-            } else {
-                console.warn('CLERK_SECRET_KEY is not set. Skipping cloud recharge.');
+                // 현재 코인 조회
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('coins')
+                    .eq('id', userId)
+                    .single();
+                
+                const currentCoins = profile?.coins || 0;
+                
+                // 코인 업데이트
+                await supabase
+                    .from('profiles')
+                    .update({ coins: currentCoins + Number(coins) })
+                    .eq('id', userId);
+                    
+                console.log(`Supabase Cloud Recharge Success: User ${userId}, +${coins} coins`);
             }
-        } catch (clerkError) {
-            console.error('Clerk metadata update failed:', clerkError);
-            // 결제 자체는 성공했으므로 200 반환 (로컬 스토리지가 보완함)
+        } catch (supabaseError) {
+            console.error('Supabase update failed:', supabaseError);
         }
     }
 
