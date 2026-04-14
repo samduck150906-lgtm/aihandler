@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 import { useChatFlow } from "@/hooks/useChatFlow";
 import { usePromptHistory } from "@/hooks/usePromptHistory";
 import { useFreemium, MAX_FREE_LIMIT, COST_PER_GENERATION } from "@/hooks/useFreemium";
-import { SignedIn, SignedOut, SignInButton, UserButton, useUser } from "@clerk/nextjs";
 import { PromptResult } from "@/components/prompt-result";
 import { Skeleton } from "@/components/skeleton";
 import { toast } from "sonner";
