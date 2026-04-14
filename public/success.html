@@ -56,6 +56,7 @@
         const orderId = params.get('orderId');
         const amount = params.get('amount');
         const customCoins = params.get('customCoins') || '3';
+        const userId = params.get('userId');
 
         async function confirmPayment() {
             if (!paymentKey || !orderId || !amount) {
@@ -66,7 +67,13 @@
                 const res = await fetch('/.netlify/functions/confirm-payment', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ paymentKey, orderId, amount: Number(amount) }),
+                    body: JSON.stringify({ 
+                        paymentKey, 
+                        orderId, 
+                        amount: Number(amount),
+                        coins: Number(customCoins),
+                        userId: userId 
+                    }),
                 });
                 const data = await res.json();
                 if (res.ok && data.status === 'DONE') {

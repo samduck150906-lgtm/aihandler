@@ -3,6 +3,8 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Footer } from "@/components/Footer";
 import { Toaster } from "sonner";
+import { ClerkProvider } from "@clerk/nextjs";
+import { koKR } from "@clerk/localizations";
 
 export const metadata: Metadata = {
   title: "AI 핸들러 - 전 세계 AI 툴 통합 허브 & 맞춤형 프롬프트",
@@ -88,12 +90,14 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-dvh flex flex-col">
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {children}
-          <Footer />
-          <Toaster theme="system" position="bottom-right" richColors />
-          <GoogleAnalytics gaId="G-X6X4VSV53F" />
-        </ThemeProvider>
+        <ClerkProvider localization={koKR}>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            {children}
+            <Footer />
+            <Toaster theme="system" position="bottom-right" richColors />
+            <GoogleAnalytics gaId="G-X6X4VSV53F" />
+          </ThemeProvider>
+        </ClerkProvider>
       </body>
     </html>
   );

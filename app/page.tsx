@@ -2,11 +2,12 @@
 
 import { useRef, useEffect, useState, useMemo } from "react";
 import { useTheme } from "next-themes";
-import { RotateCcw, Sparkles, Zap, ExternalLink, CreditCard, UserX, LayoutTemplate, Sun, Moon, History, Trash2, Search, Info, UserCircle } from "lucide-react";
+import { RotateCcw, Sparkles, Zap, ExternalLink, CreditCard, UserX, LayoutTemplate, Sun, Moon, History, Trash2, Search, Info, UserCircle, LogIn } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useChatFlow } from "@/hooks/useChatFlow";
 import { usePromptHistory } from "@/hooks/usePromptHistory";
 import { useFreemium, MAX_FREE_LIMIT, COST_PER_GENERATION } from "@/hooks/useFreemium";
+import { SignedIn, SignedOut, SignInButton, UserButton, useUser } from "@clerk/nextjs";
 import { PromptResult } from "@/components/prompt-result";
 import { Skeleton } from "@/components/skeleton";
 import { toast } from "sonner";
@@ -36,7 +37,7 @@ export default function HomePage() {
   } = useChatFlow();
 
   const { history, savePrompt, removePrompt, clearHistory } = usePromptHistory();
-  const { usageCount, coins, isAdmin, userEmail, isLoaded, canGenerate, incrementUsage, addCoins, verifyAdmin } = useFreemium();
+  const { usageCount, coins, isAdmin, userEmail, userId, isLoaded, canGenerate, incrementUsage, addCoins, verifyAdmin } = useFreemium();
 
 
 
@@ -213,6 +214,27 @@ export default function HomePage() {
                 {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               </button>
             )}
+
+            <div className="flex items-center ml-1 border-l pl-3 dark:border-zinc-800">
+              <SignedOut>
+                <SignInButton mode="modal">
+                  <button className="flex items-center gap-1.5 px-3 py-1.5 bg-ink text-white dark:bg-zinc-100 dark:text-zinc-900 text-xs font-bold hover:bg-brand-500 transition-colors shadow-[2px_2px_0px_#1f2937] dark:shadow-[2px_2px_0px_#000]">
+                    <LogIn className="w-3.5 h-3.5" />
+                    로그인
+                  </button>
+                </SignInButton>
+              </SignedOut>
+              <SignedIn>
+                <UserButton 
+                  appearance={{
+                    elements: {
+                      userButtonAvatarBox: "w-8 h-8 border-2 border-ink dark:border-zinc-700 rounded-none",
+                      userButtonTrigger: "focus:shadow-none focus:ring-0"
+                    }
+                  }}
+                />
+              </SignedIn>
+            </div>
           </div>
         </div>
       </header>
@@ -342,7 +364,10 @@ export default function HomePage() {
                           <span className="text-ink-muted dark:text-zinc-500 text-[10px]">(1회 = {COST_PER_GENERATION}코인 차감)</span>
                         </div>
                         <a 
-                          href={`/checkout.html${userEmail ? `?email=${encodeURIComponent(userEmail)}` : ''}`} 
+                          href={`/checkout.html?${new URLSearchParams({
+                            email: userEmail || "",
+                            userId: userId || ""
+                          }).toString()}`} 
                           className="text-[10px] sm:text-xs font-black text-white bg-ink dark:bg-zinc-300 dark:text-zinc-900 px-3 py-1.5 border-[2px] border-ink dark:border-black rounded-none shadow-[2px_2px_0px_#1f2937] dark:shadow-[2px_2px_0px_#000] hover:bg-brand-500 hover:text-white transition-colors uppercase"
                         >
                            코인 충전 ⚡
