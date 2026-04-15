@@ -1,22 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
 const USAGE_KEY = "prompt_maker_usage";
 const COINS_KEY = "prompt_maker_coins";
-const ADMIN_KEY = "prompt_maker_admin";
-const EMAIL_KEY = "prompt_maker_email";
 
 export const MAX_FREE_LIMIT = 3;
 export const COST_PER_GENERATION = 3;
 
-// 하드코딩된 관리자 계정 목록 (영구 무료 허용)
-const ADMIN_EMAILS = [
-  "samduck150906@gmail.com",
-  "ceo@eternalsix.kr",
-  "ceo@eternalsix.com"
-];
+export type SubscriptionStatus = "none" | "active" | "cancelled" | "past_due";
 
 export function useFreemium() {
   const [usageCount, setUsageCount] = useState<number>(0);
@@ -25,6 +18,22 @@ export function useFreemium() {
   const [userEmail, setUserEmail] = useState<string>("");
   const [isLoaded, setIsLoaded] = useState(false);
   const [session, setSession] = useState<any>(null);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus>("none");
+
+  // Check admin status via server-side function (no hardcoded emails)
+  const checkAdminStatus = useCallback(async (accessToken: string) => {
+    try {
+      const res = await fetch("/.netlify/functions/check-admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ accessToken }),
+      });
+      const data = await res.json();
+      setIsAdmin(data.isAdmin === true);
+    } catch {
+      setIsAdmin(false);
+    }
+  }, []);
 
   // Auth State Listener
   useEffect(() => {
@@ -32,7 +41,9 @@ export function useFreemium() {
       setSession(session);
       if (session?.user) {
         setUserEmail(session.user.email || "");
-        setIsAdmin(ADMIN_EMAILS.includes(session.user.email?.toLowerCase() || ""));
+        if (session.access_token) {
+          checkAdminStatus(session.access_token);
+        }
       }
     });
 
@@ -40,40 +51,41 @@ export function useFreemium() {
       setSession(session);
       if (session?.user) {
         setUserEmail(session.user.email || "");
-        setIsAdmin(ADMIN_EMAILS.includes(session.user.email?.toLowerCase() || ""));
+        if (session.access_token) {
+          checkAdminStatus(session.access_token);
+        }
       } else {
         setUserEmail("");
         setIsAdmin(false);
+        setSubscriptionStatus("none");
       }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [checkAdminStatus]);
 
-  // Sync Data
+  // Sync Data from Supabase or localStorage
   useEffect(() => {
     async function syncData() {
       if (session?.user) {
-        // Fetch from Supabase (using snake_case column names per Postgres convention)
         const { data } = await supabase
-          .from('profiles')
-          .select('coins, usage_count')
-          .eq('id', session.user.id)
+          .from("profiles")
+          .select("coins, usage_count, subscription_status")
+          .eq("id", session.user.id)
           .single();
 
         if (data) {
           setCoins(data.coins || 0);
           setUsageCount(data.usage_count || 0);
+          setSubscriptionStatus(data.subscription_status || "none");
         }
       } else {
-        // Load from LocalStorage for Guests
         try {
           const storedUsage = localStorage.getItem(USAGE_KEY);
           const storedCoins = localStorage.getItem(COINS_KEY);
-          
           if (storedUsage) setUsageCount(parseInt(storedUsage, 10));
           if (storedCoins) setCoins(parseInt(storedCoins, 10));
-        } catch (e) {}
+        } catch {}
       }
       setIsLoaded(true);
     }
@@ -81,8 +93,10 @@ export function useFreemium() {
     syncData();
   }, [session]);
 
+  const isPro = subscriptionStatus === "active";
+
   const incrementUsage = async () => {
-    if (isAdmin) return;
+    if (isAdmin || isPro) return;
 
     let nextUsage = usageCount;
     let nextCoins = coins;
@@ -96,37 +110,37 @@ export function useFreemium() {
     }
 
     if (session?.user) {
-      // Update Supabase (snake_case column names)
-      await supabase
-        .from('profiles')
-        .update({ coins: nextCoins, usage_count: nextUsage })
-        .eq('id', session.user.id);
+      // Atomic update on server
+      if (usageCount < MAX_FREE_LIMIT) {
+        await supabase.rpc("increment_usage", { p_user_id: session.user.id });
+      } else if (coins >= COST_PER_GENERATION) {
+        await supabase.rpc("deduct_coins", {
+          p_user_id: session.user.id,
+          p_amount: COST_PER_GENERATION,
+        });
+      }
     } else {
-      // Update LocalStorage
       try {
         localStorage.setItem(USAGE_KEY, nextUsage.toString());
         localStorage.setItem(COINS_KEY, nextCoins.toString());
-      } catch (e) {}
+      } catch {}
     }
   };
 
-  const addCoins = (amount: number) => {
-    const nextCoins = coins + amount;
-    setCoins(nextCoins);
-    if (!session?.user) {
-      try { localStorage.setItem(COINS_KEY, nextCoins.toString()); } catch (e) {}
-    }
-    // Note: Cloud addCoins is done in confirm-payment netlify function.
-  };
+  const canGenerate = isAdmin || isPro || usageCount < MAX_FREE_LIMIT || coins >= COST_PER_GENERATION;
 
-  const canGenerate = isAdmin || usageCount < MAX_FREE_LIMIT || coins >= COST_PER_GENERATION;
-
+  // --- Auth Methods ---
   const loginWithGoogle = async () => {
     await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin
-      }
+      provider: "google",
+      options: { redirectTo: window.location.origin },
+    });
+  };
+
+  const loginWithGitHub = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: "github",
+      options: { redirectTo: window.location.origin },
     });
   };
 
@@ -136,12 +150,10 @@ export function useFreemium() {
   };
 
   const signUpWithEmail = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({ 
-      email, 
+    const { error } = await supabase.auth.signUp({
+      email,
       password,
-      options: {
-        emailRedirectTo: window.location.origin
-      }
+      options: { emailRedirectTo: window.location.origin },
     });
     if (error) throw error;
   };
@@ -150,20 +162,66 @@ export function useFreemium() {
     await supabase.auth.signOut();
   };
 
+  // --- Paddle Checkout ---
+  const openPaddleCheckout = useCallback(
+    (priceId: string) => {
+      const paddle = (window as any).Paddle;
+      if (!paddle) {
+        console.error("Paddle.js not loaded");
+        return;
+      }
+      paddle.Checkout.open({
+        items: [{ priceId, quantity: 1 }],
+        customData: {
+          user_id: session?.user?.id || "",
+          user_email: session?.user?.email || "",
+        },
+        customer: session?.user?.email
+          ? { email: session.user.email }
+          : undefined,
+        settings: {
+          theme: "light",
+          locale: "en",
+          displayMode: "overlay",
+          successUrl: `${window.location.origin}?payment=completed`,
+        },
+      });
+    },
+    [session]
+  );
+
+  // Refresh coins from DB (call after successful payment)
+  const refreshCoins = useCallback(async () => {
+    if (!session?.user) return;
+    const { data } = await supabase
+      .from("profiles")
+      .select("coins, subscription_status")
+      .eq("id", session.user.id)
+      .single();
+    if (data) {
+      setCoins(data.coins || 0);
+      setSubscriptionStatus(data.subscription_status || "none");
+    }
+  }, [session]);
+
   return {
     usageCount,
     coins,
     isAdmin,
+    isPro,
     userEmail,
     isLoaded,
     canGenerate,
     incrementUsage,
-    addCoins,
+    subscriptionStatus,
     loginWithGoogle,
+    loginWithGitHub,
     loginWithEmail,
     signUpWithEmail,
     logout,
+    openPaddleCheckout,
+    refreshCoins,
     isSignedIn: !!session?.user,
-    userId: session?.user?.id
+    userId: session?.user?.id,
   };
 }

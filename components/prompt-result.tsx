@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { Copy, Check, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { trackContentShared } from "@/lib/gtag";
+import { useTranslation } from "@/lib/i18n/index";
 import type { ResultResponse } from "@/lib/types";
 
 interface PromptResultProps {
@@ -12,9 +13,10 @@ interface PromptResultProps {
 }
 
 export function PromptResult({ result, onRetry }: PromptResultProps) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
-  
-  const generatedPrompt = result.searchQueries?.[0] || "프롬프트를 생성하지 못했습니다.";
+
+  const generatedPrompt = result.searchQueries?.[0] || t("result.fallback");
 
   const handleCopy = useCallback(async () => {
     try {
@@ -30,19 +32,19 @@ export function PromptResult({ result, onRetry }: PromptResultProps) {
   return (
     <div className="w-full max-w-3xl mx-auto animate-pop-in">
       <div className="border-[3px] border-ink dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-[4px_4px_0px_#1f2937] dark:shadow-[4px_4px_0px_#000]">
-        
+
         {/* Header */}
         <div className="bg-ink dark:bg-zinc-800 text-white px-4 py-3 flex items-center justify-between">
           <span className="font-mono text-sm tracking-widest font-bold">
-            ✨ PROMPT GENERATED
+            {t("result.generated")}
           </span>
           <span className="font-mono text-xs font-black px-2.5 py-0.5 bg-brand-400 text-ink rounded-full">
-            SUCCESS
+            {t("result.success")}
           </span>
         </div>
 
         {/* Content Body */}
-        <div className="p-5 md:p-6 pb-20 md:pb-4 position-relative">
+        <div className="p-5 md:p-6 pb-20 md:pb-4">
           <div className="mb-4">
             <h2 className="text-xl md:text-2xl font-black text-ink dark:text-zinc-100 leading-tight mb-2">
               {result.title}
@@ -78,7 +80,7 @@ export function PromptResult({ result, onRetry }: PromptResultProps) {
 
           {result.suggestions?.length > 0 && (
             <div className="mt-5 p-4 bg-brand-50 dark:bg-zinc-800/50 border-[2px] border-brand-200 dark:border-zinc-700">
-              <p className="font-bold text-sm text-brand-800 dark:text-zinc-300 mb-2">💡 활용 팁</p>
+              <p className="font-bold text-sm text-brand-800 dark:text-zinc-300 mb-2">{t("result.tips")}</p>
               <ul className="text-sm text-brand-700 dark:text-zinc-400 list-disc list-inside space-y-1">
                 {result.suggestions.map((s, i) => (
                   <li key={i}>{s}</li>
@@ -88,7 +90,7 @@ export function PromptResult({ result, onRetry }: PromptResultProps) {
           )}
         </div>
 
-        {/* Footer Actions (Floating on Mobile) */}
+        {/* Footer Actions */}
         <div className="bg-surface-muted dark:bg-zinc-900/50 border-t-[3px] border-ink dark:border-zinc-800 p-4 flex justify-end gap-3 fixed bottom-0 left-0 right-0 md:relative md:bottom-auto md:left-auto md:right-auto z-40 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] md:shadow-none bg-opacity-95 backdrop-blur-sm md:backdrop-blur-none">
           <button
             type="button"
@@ -103,7 +105,7 @@ export function PromptResult({ result, onRetry }: PromptResultProps) {
             )}
           >
             <RotateCcw className="w-4 h-4" />
-            다시 생성
+            {t("result.retry")}
           </button>
           <button
             type="button"
@@ -121,12 +123,12 @@ export function PromptResult({ result, onRetry }: PromptResultProps) {
             {copied ? (
               <>
                 <Check className="w-5 h-5 md:w-4 md:h-4" />
-                복사 완료
+                {t("result.copied")}
               </>
             ) : (
               <>
                 <Copy className="w-5 h-5 md:w-4 md:h-4" />
-                프롬프트 복사하기
+                {t("result.copy")}
               </>
             )}
           </button>

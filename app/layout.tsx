@@ -1,29 +1,31 @@
 import type { Metadata, Viewport } from "next";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { ThemeProvider } from "@/components/theme-provider";
+import { I18nProvider } from "@/lib/i18n/index";
 import { Footer } from "@/components/Footer";
 import { Toaster } from "sonner";
+import Script from "next/script";
 
 export const metadata: Metadata = {
-  title: "AI 핸들러 - 전 세계 AI 툴 통합 허브 & 맞춤형 프롬프트",
+  title: "AI Handler - Global AI Prompt Hub & Optimization",
   description:
-    "AI 툴별 최적화된 프롬프트 자동 생성 및 주요 AI 툴 가입/구독 한방 링크 통합 솔루션",
+    "Generate optimized prompts for 22+ AI tools with one click. ChatGPT, Claude, Midjourney, Suno & more. Global payment, instant results.",
   metadataBase: new URL("https://aihandler.run"),
   alternates: {
     canonical: "/",
   },
   keywords: [
-    "AI 프롬프트",
-    "프롬프트 지니어",
-    "ChatGPT 프롬프트",
-    "미드저니 프롬프트",
-    "AI 툴 허브",
-    "프롬프트 자동생성",
+    "AI prompt",
+    "prompt generator",
+    "ChatGPT prompt",
+    "Midjourney prompt",
+    "AI tool hub",
+    "prompt optimization",
     "AI Handler",
   ],
   openGraph: {
-    title: "AI 핸들러 (AI Handler) - 전 세계 AI를 지휘하는 프롬프트 허브",
-    description: "AI 툴별 최적화된 프롬프트 자동 생성 및 글로벌 AI 마켓 직통 링크 통합 솔루션",
+    title: "AI Handler - Global AI Prompt Hub",
+    description: "Generate optimized prompts for any AI tool instantly. Simple. Powerful. Global.",
     url: "https://aihandler.run",
     siteName: "AI Handler",
     images: [
@@ -35,12 +37,12 @@ export const metadata: Metadata = {
       },
     ],
     type: "website",
-    locale: "ko_KR",
+    locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "AI 핸들러 (AI Handler)",
-    description: "전 세계 모든 AI를 지휘하는 당신만의 프롬프트 통합 허브",
+    title: "AI Handler",
+    description: "Your AI Prompt Hub. Generate better prompts faster.",
     images: ["/og-image.png"],
   },
   icons: {
@@ -74,8 +76,11 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const paddleToken = process.env.NEXT_PUBLIC_PADDLE_TOKEN;
+  const paddleClientToken = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN;
+
   return (
-    <html lang="ko">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="stylesheet" href="/globals.css" />
         <link
@@ -86,12 +91,31 @@ export default function RootLayout({
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap"
         />
+
+        {/* Paddle Billing v2 Script */}
+        {paddleClientToken && (
+          <Script
+            src="https://cdn.paddle.com/paddle/v2/paddle.js"
+            strategy="afterInteractive"
+            onLoad={() => {
+              const paddle = (window as any).Paddle;
+              if (paddle) {
+                paddle.Setup({
+                  token: paddleClientToken,
+                  environment: "production",
+                });
+              }
+            }}
+          />
+        )}
       </head>
       <body className="min-h-dvh flex flex-col">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {children}
-          <Footer />
-          <Toaster theme="system" position="bottom-right" richColors />
+          <I18nProvider>
+            {children}
+            <Footer />
+            <Toaster theme="system" position="bottom-right" richColors />
+          </I18nProvider>
           <GoogleAnalytics gaId="G-X6X4VSV53F" />
         </ThemeProvider>
       </body>
