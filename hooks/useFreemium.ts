@@ -8,6 +8,10 @@ const COINS_KEY = "prompt_maker_coins";
 
 export const MAX_FREE_LIMIT = 3;
 export const COST_PER_GENERATION = 3;
+export const PRO_DAILY_LIMIT = 200;
+
+const PRO_USAGE_KEY = "prompt_maker_pro_usage";
+const PRO_USAGE_DATE_KEY = "prompt_maker_pro_date";
 
 export type SubscriptionStatus = "none" | "active" | "cancelled" | "past_due";
 
@@ -19,6 +23,7 @@ export function useFreemium() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [session, setSession] = useState<any>(null);
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus>("none");
+  const [proDailyUsage, setProDailyUsage] = useState<number>(0);
 
   // Check admin status via server-side function (no hardcoded emails)
   const checkAdminStatus = useCallback(async (accessToken: string) => {
@@ -87,6 +92,20 @@ export function useFreemium() {
           if (storedCoins) setCoins(parseInt(storedCoins, 10));
         } catch {}
       }
+      // Load Pro daily usage from localStorage
+      try {
+        const today = new Date().toISOString().slice(0, 10);
+        const storedDate = localStorage.getItem(PRO_USAGE_DATE_KEY);
+        if (storedDate === today) {
+          const storedProUsage = localStorage.getItem(PRO_USAGE_KEY);
+          if (storedProUsage) setProDailyUsage(parseInt(storedProUsage, 10));
+        } else {
+          localStorage.setItem(PRO_USAGE_DATE_KEY, today);
+          localStorage.setItem(PRO_USAGE_KEY, "0");
+          setProDailyUsage(0);
+        }
+      } catch {}
+
       setIsLoaded(true);
     }
 
@@ -94,9 +113,22 @@ export function useFreemium() {
   }, [session]);
 
   const isPro = subscriptionStatus === "active";
+  const proLimitReached = isPro && proDailyUsage >= PRO_DAILY_LIMIT;
 
   const incrementUsage = async () => {
-    if (isAdmin || isPro) return;
+    if (isAdmin) return;
+
+    // Pro: track daily usage
+    if (isPro) {
+      const next = proDailyUsage + 1;
+      setProDailyUsage(next);
+      try {
+        const today = new Date().toISOString().slice(0, 10);
+        localStorage.setItem(PRO_USAGE_DATE_KEY, today);
+        localStorage.setItem(PRO_USAGE_KEY, next.toString());
+      } catch {}
+      return;
+    }
 
     let nextUsage = usageCount;
     let nextCoins = coins;
@@ -127,7 +159,7 @@ export function useFreemium() {
     }
   };
 
-  const canGenerate = isAdmin || isPro || usageCount < MAX_FREE_LIMIT || coins >= COST_PER_GENERATION;
+  const canGenerate = isAdmin || (isPro && !proLimitReached) || usageCount < MAX_FREE_LIMIT || coins >= COST_PER_GENERATION;
 
   // --- Auth Methods ---
   const loginWithGoogle = async () => {
@@ -209,6 +241,8 @@ export function useFreemium() {
     coins,
     isAdmin,
     isPro,
+    proDailyUsage,
+    proLimitReached,
     userEmail,
     isLoaded,
     canGenerate,

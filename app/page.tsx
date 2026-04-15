@@ -6,7 +6,7 @@ import { RotateCcw, Sparkles, Zap, ExternalLink, CreditCard, UserX, LayoutTempla
 import { cn } from "@/lib/utils";
 import { useChatFlow } from "@/hooks/useChatFlow";
 import { usePromptHistory } from "@/hooks/usePromptHistory";
-import { useFreemium, MAX_FREE_LIMIT, COST_PER_GENERATION } from "@/hooks/useFreemium";
+import { useFreemium, MAX_FREE_LIMIT, COST_PER_GENERATION, PRO_DAILY_LIMIT } from "@/hooks/useFreemium";
 import { useTranslation } from "@/lib/i18n/index";
 import { PromptResult } from "@/components/prompt-result";
 import { Skeleton } from "@/components/skeleton";
@@ -43,6 +43,8 @@ export default function HomePage() {
     coins,
     isAdmin,
     isPro,
+    proDailyUsage,
+    proLimitReached,
     userEmail,
     userId,
     isLoaded,
@@ -533,6 +535,76 @@ export default function HomePage() {
                   </p>
                 </div>
 
+                {/* Advanced Settings Toggle */}
+                <div className="mb-5">
+                  <button
+                    type="button"
+                    onClick={() => setShowAdvanced(!showAdvanced)}
+                    className="flex items-center gap-2 text-xs font-bold text-ink-muted dark:text-zinc-400 hover:text-ink dark:hover:text-zinc-200 transition-colors"
+                  >
+                    <Settings2 className="w-3.5 h-3.5" />
+                    {locale === "ko" ? "상세 설정 (선택사항)" : "Advanced Settings (Optional)"}
+                    <ChevronDown className={cn("w-3.5 h-3.5 transition-transform", showAdvanced && "rotate-180")} />
+                  </button>
+
+                  {showAdvanced && (
+                    <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 p-4 bg-surface-muted dark:bg-zinc-950 border-[2px] border-ink-faint dark:border-zinc-800 animate-fade-in">
+                      <div>
+                        <label className="block text-[11px] font-bold text-ink-muted dark:text-zinc-500 mb-1 uppercase tracking-wide">
+                          {locale === "ko" ? "역할 / 페르소나" : "Role / Persona"}
+                        </label>
+                        <input
+                          type="text"
+                          value={advRole}
+                          onChange={(e) => setAdvRole(e.target.value)}
+                          placeholder={locale === "ko" ? "예: 10년차 마케팅 전문가" : "e.g. Senior marketing expert"}
+                          className="w-full border-[2px] border-ink-faint dark:border-zinc-700 bg-white dark:bg-zinc-900 dark:text-zinc-100 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-ink-faint dark:placeholder:text-zinc-600"
+                          disabled={isLoading}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-bold text-ink-muted dark:text-zinc-500 mb-1 uppercase tracking-wide">
+                          {locale === "ko" ? "출력 형식" : "Output Format"}
+                        </label>
+                        <input
+                          type="text"
+                          value={advFormat}
+                          onChange={(e) => setAdvFormat(e.target.value)}
+                          placeholder={locale === "ko" ? "예: 마크다운 표, 번호 목록" : "e.g. Markdown table, bullet list"}
+                          className="w-full border-[2px] border-ink-faint dark:border-zinc-700 bg-white dark:bg-zinc-900 dark:text-zinc-100 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-ink-faint dark:placeholder:text-zinc-600"
+                          disabled={isLoading}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-bold text-ink-muted dark:text-zinc-500 mb-1 uppercase tracking-wide">
+                          {locale === "ko" ? "배경 / 맥락" : "Context / Background"}
+                        </label>
+                        <input
+                          type="text"
+                          value={advContext}
+                          onChange={(e) => setAdvContext(e.target.value)}
+                          placeholder={locale === "ko" ? "예: B2B SaaS 스타트업 대상" : "e.g. Targeting B2B SaaS startups"}
+                          className="w-full border-[2px] border-ink-faint dark:border-zinc-700 bg-white dark:bg-zinc-900 dark:text-zinc-100 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-ink-faint dark:placeholder:text-zinc-600"
+                          disabled={isLoading}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-bold text-ink-muted dark:text-zinc-500 mb-1 uppercase tracking-wide">
+                          {locale === "ko" ? "추가 지시사항" : "Extra Instructions"}
+                        </label>
+                        <input
+                          type="text"
+                          value={advExtras}
+                          onChange={(e) => setAdvExtras(e.target.value)}
+                          placeholder={locale === "ko" ? "예: SEO 키워드 포함, 이모지 사용" : "e.g. Include SEO keywords, use emojis"}
+                          className="w-full border-[2px] border-ink-faint dark:border-zinc-700 bg-white dark:bg-zinc-900 dark:text-zinc-100 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder:text-ink-faint dark:placeholder:text-zinc-600"
+                          disabled={isLoading}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 {/* Freemium Progress Bar */}
                 {isLoaded && (
                   <div className="mb-4">
@@ -541,8 +613,15 @@ export default function HomePage() {
                         ✨ {t("free.adminUnlimited")}
                       </div>
                     ) : isPro ? (
-                      <div className="text-center bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 text-xs font-bold py-2 border border-emerald-200 dark:border-emerald-800/50">
-                        ✨ Pro Plan Active
+                      <div className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-900/20 p-3 border border-emerald-200 dark:border-emerald-800/50">
+                        <div className="text-[11px] font-black text-emerald-700 dark:text-emerald-300">
+                          ✨ Pro Plan &middot; {locale === "ko" ? "오늘" : "Today"}: {proDailyUsage} / {200}
+                        </div>
+                        {proLimitReached && (
+                          <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400">
+                            {locale === "ko" ? "일일 한도 도달" : "Daily limit reached"}
+                          </span>
+                        )}
                       </div>
                     ) : usageCount < MAX_FREE_LIMIT ? (
                       <div className="flex items-center gap-3 bg-surface-muted dark:bg-zinc-950 p-3 border-[2px] border-ink-faint dark:border-zinc-800">
