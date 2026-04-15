@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState, useMemo } from "react";
 import { useTheme } from "next-themes";
-import { RotateCcw, Sparkles, Zap, ExternalLink, CreditCard, UserX, LayoutTemplate, Sun, Moon, History, Trash2, Search, LogIn, LogOut, Globe } from "lucide-react";
+import { RotateCcw, Sparkles, Zap, ExternalLink, CreditCard, UserX, LayoutTemplate, Sun, Moon, History, Trash2, Search, LogIn, LogOut, Globe, ChevronDown, Settings2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useChatFlow } from "@/hooks/useChatFlow";
 import { usePromptHistory } from "@/hooks/usePromptHistory";
@@ -145,6 +145,13 @@ export default function HomePage() {
   const [purpose, setPurpose] = useState("");
   const [tone, setTone] = useState(TONES[0]);
   const [length, setLength] = useState(LENGTHS[0]);
+  // Advanced Settings
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [advRole, setAdvRole] = useState("");
+  const [advFormat, setAdvFormat] = useState("");
+  const [advContext, setAdvContext] = useState("");
+  const [advExtras, setAdvExtras] = useState("");
+
   const [activeCategory, setActiveCategory] = useState<Category>("전체");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -188,7 +195,12 @@ export default function HomePage() {
     }
 
     clearError();
-    handleSearch(selectedAI, purpose.trim(), tone, length);
+    handleSearch(selectedAI, purpose.trim(), tone, length, locale, {
+      role: advRole.trim() || undefined,
+      format: advFormat.trim() || undefined,
+      context: advContext.trim() || undefined,
+      extras: advExtras.trim() || undefined,
+    });
   };
 
   // Keyboard shortcut: Ctrl/Cmd + Enter
@@ -364,14 +376,13 @@ export default function HomePage() {
 
             {/* Language Switcher */}
             <div className="flex items-center gap-1 border-l pl-3 dark:border-zinc-800">
-              <select
-                value={locale}
-                onChange={(e) => setLocale(e.target.value as "en" | "ko")}
-                className="border-[2px] border-ink dark:border-zinc-700 bg-white dark:bg-zinc-800 text-ink dark:text-zinc-200 px-2 py-1 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-brand-500"
+              <Globe className="w-3.5 h-3.5 text-ink-muted dark:text-zinc-500" />
+              <button
+                onClick={() => setLocale(locale === "en" ? "ko" : "en")}
+                className="px-2.5 py-1.5 border-[2px] border-ink dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-black text-ink dark:text-zinc-200 hover:bg-brand-50 dark:hover:bg-zinc-700 active:translate-y-[1px] shadow-[2px_2px_0px_#1f2937] dark:shadow-[2px_2px_0px_#000] uppercase tracking-wider"
               >
-                <option value="en">English</option>
-                <option value="ko">한국어</option>
-              </select>
+                {locale === "en" ? "한국어" : "EN"}
+              </button>
             </div>
 
             {mounted && (
