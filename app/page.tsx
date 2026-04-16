@@ -7,16 +7,16 @@ import { cn } from "@/lib/utils";
 import { useChatFlow } from "@/hooks/useChatFlow";
 import { usePromptHistory } from "@/hooks/usePromptHistory";
 import { useFreemium, MAX_FREE_LIMIT, COST_PER_GENERATION, PRO_DAILY_LIMIT } from "@/hooks/useFreemium";
-import { useTranslation } from "@/lib/i18n/index";
+import { useTranslation, getToneOptions, getLengthOptions, getCategoryLabel } from "@/lib/i18n/index";
 import { PromptResult } from "@/components/prompt-result";
 import { Skeleton } from "@/components/skeleton";
 import { toast } from "sonner";
 import Link from "next/link";
 import { AI_TOOLS, type Category } from "@/lib/data/ai-tools";
 
-const TONES = ["상관없음", "전문적인", "친근한", "분석적인", "창의적인", "직설적인"];
-const LENGTHS = ["상관없음", "짧게 (1문단)", "중간 (2~3문단)", "길게 (상세하게)"];
-const CATEGORIES: Category[] = ["전체", "텍스트/LLM", "이미지", "비디오", "오디오/음악", "생산성/코딩"];
+const TONE_VALUES = ["상관없음", "전문적인", "친근한", "분석적인", "창의적인", "직설적인"];
+const LENGTH_VALUES = ["상관없음", "짧게 (1문단)", "중간 (2~3문단)", "길게 (상세하게)"];
+const CATEGORY_VALUES: Category[] = ["전체", "텍스트/LLM", "이미지", "비디오", "오디오/음악", "생산성/코딩"];
 
 export default function HomePage() {
   const { theme, setTheme } = useTheme();
@@ -156,8 +156,8 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState<"generator" | "history">("generator");
   const [selectedAI, setSelectedAI] = useState(AI_TOOLS[0].name);
   const [purpose, setPurpose] = useState("");
-  const [tone, setTone] = useState(TONES[0]);
-  const [length, setLength] = useState(LENGTHS[0]);
+  const [tone, setTone] = useState(TONE_VALUES[0]);
+  const [length, setLength] = useState(LENGTH_VALUES[0]);
   // Advanced Settings
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [advRole, setAdvRole] = useState("");
@@ -486,8 +486,8 @@ export default function HomePage() {
                       className="w-full border-[2px] border-ink dark:border-zinc-700 bg-surface-muted dark:bg-zinc-800 dark:text-zinc-200 px-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand-500"
                       disabled={isLoading}
                     >
-                      {CATEGORIES.filter((c) => c !== "전체").map((cat) => (
-                        <optgroup key={cat} label={cat}>
+                      {CATEGORY_VALUES.filter((c) => c !== "전체").map((cat) => (
+                        <optgroup key={cat} label={getCategoryLabel(locale, cat)}>
                           {AI_TOOLS.filter((t) => t.category === cat).map((tool) => (
                             <option key={tool.name} value={tool.name}>
                               {tool.name}
@@ -508,9 +508,9 @@ export default function HomePage() {
                       className="w-full border-[2px] border-ink dark:border-zinc-700 bg-surface-muted dark:bg-zinc-800 dark:text-zinc-200 px-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand-500"
                       disabled={isLoading}
                     >
-                      {TONES.map((t) => (
-                        <option key={t} value={t}>
-                          {t}
+                      {getToneOptions(locale).map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
                         </option>
                       ))}
                     </select>
@@ -526,9 +526,9 @@ export default function HomePage() {
                       className="w-full border-[2px] border-ink dark:border-zinc-700 bg-surface-muted dark:bg-zinc-800 dark:text-zinc-200 px-3 py-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand-500"
                       disabled={isLoading}
                     >
-                      {LENGTHS.map((l) => (
-                        <option key={l} value={l}>
-                          {l}
+                      {getLengthOptions(locale).map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
                         </option>
                       ))}
                     </select>
@@ -834,7 +834,7 @@ export default function HomePage() {
           </div>
 
           <div className="mb-4 flex flex-wrap gap-1.5">
-            {CATEGORIES.map((cat) => (
+            {CATEGORY_VALUES.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
@@ -843,7 +843,7 @@ export default function HomePage() {
                   activeCategory === cat ? "bg-brand-400 text-ink" : "bg-white dark:bg-zinc-800 text-ink dark:text-zinc-300 hover:bg-surface-muted dark:hover:bg-zinc-700"
                 )}
               >
-                {cat}
+                {getCategoryLabel(locale, cat)}
               </button>
             ))}
           </div>
