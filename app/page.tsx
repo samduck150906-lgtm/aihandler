@@ -81,16 +81,27 @@ export default function HomePage() {
       setAuthEmail("");
       setAuthPassword("");
     } catch (error: any) {
+      console.error("[Auth Error]", error);
       const msg = error?.message || t("auth.err.generic");
-      if (msg.includes("Invalid login credentials")) {
+
+      if (msg.includes("Auth service not configured")) {
+        toast.error("Auth not configured - check Supabase environment variables", {
+          description: "NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set",
+          duration: 6000
+        });
+      } else if (msg.includes("Invalid login credentials")) {
         toast.error(t("auth.err.invalidCredentials"));
       } else if (msg.includes("User already registered")) {
         toast.error(t("auth.err.alreadyRegistered"));
         setAuthMode("login");
       } else if (msg.includes("Password should be at least")) {
         toast.error(t("auth.err.weakPassword"));
+      } else if (msg.includes("Email not confirmed")) {
+        toast.error("Email not confirmed - check your inbox for confirmation link", {
+          duration: 5000
+        });
       } else {
-        toast.error(msg);
+        toast.error(msg, { duration: 5000 });
       }
     } finally {
       setIsAuthLoading(false);
@@ -251,7 +262,14 @@ export default function HomePage() {
 
             <div className="space-y-4">
               <button
-                onClick={() => loginWithGoogle()}
+                onClick={async () => {
+                  try {
+                    await loginWithGoogle();
+                  } catch (err) {
+                    console.error("[OAuth Error]", err);
+                    toast.error("OAuth failed - check console for details");
+                  }
+                }}
                 className="w-full flex items-center justify-center gap-3 py-3 border-[2px] border-ink dark:border-zinc-700 font-bold hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-ink dark:text-zinc-200"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
