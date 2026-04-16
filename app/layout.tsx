@@ -76,8 +76,7 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const paddleToken = process.env.NEXT_PUBLIC_PADDLE_TOKEN;
-  const paddleClientToken = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN;
+  const paddleClientToken = process.env.NEXT_PUBLIC_PADDLE_TOKEN;
 
   return (
     <html lang="en" suppressHydrationWarning>

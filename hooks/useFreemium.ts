@@ -42,6 +42,11 @@ export function useFreemium() {
 
   // Auth State Listener
   useEffect(() => {
+    if (!supabase) {
+      setIsLoaded(true);
+      return;
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session?.user) {
@@ -72,7 +77,7 @@ export function useFreemium() {
   // Sync Data from Supabase or localStorage
   useEffect(() => {
     async function syncData() {
-      if (session?.user) {
+      if (session?.user && supabase) {
         const { data } = await supabase
           .from("profiles")
           .select("coins, usage_count, subscription_status")
@@ -141,7 +146,7 @@ export function useFreemium() {
       setCoins(nextCoins);
     }
 
-    if (session?.user) {
+    if (session?.user && supabase) {
       // Atomic update on server
       if (usageCount < MAX_FREE_LIMIT) {
         await supabase.rpc("increment_usage", { p_user_id: session.user.id });
@@ -163,6 +168,7 @@ export function useFreemium() {
 
   // --- Auth Methods ---
   const loginWithGoogle = async () => {
+    if (!supabase) throw new Error("Auth service not configured. Please contact support.");
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo: window.location.origin },
@@ -170,6 +176,7 @@ export function useFreemium() {
   };
 
   const loginWithGitHub = async () => {
+    if (!supabase) throw new Error("Auth service not configured. Please contact support.");
     await supabase.auth.signInWithOAuth({
       provider: "github",
       options: { redirectTo: window.location.origin },
@@ -177,11 +184,13 @@ export function useFreemium() {
   };
 
   const loginWithEmail = async (email: string, password: string) => {
+    if (!supabase) throw new Error("Auth service not configured. Please contact support.");
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
   };
 
   const signUpWithEmail = async (email: string, password: string) => {
+    if (!supabase) throw new Error("Auth service not configured. Please contact support.");
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -191,6 +200,7 @@ export function useFreemium() {
   };
 
   const logout = async () => {
+    if (!supabase) return;
     await supabase.auth.signOut();
   };
 
@@ -224,7 +234,7 @@ export function useFreemium() {
 
   // Refresh coins from DB (call after successful payment)
   const refreshCoins = useCallback(async () => {
-    if (!session?.user) return;
+    if (!session?.user || !supabase) return;
     const { data } = await supabase
       .from("profiles")
       .select("coins, subscription_status")

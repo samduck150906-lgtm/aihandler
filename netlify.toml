@@ -7,13 +7,29 @@
   node_bundler = "esbuild"
 
 # Environment variables (configure in Netlify dashboard for production)
+# Required for Supabase Auth:
 # - NEXT_PUBLIC_SUPABASE_URL
 # - NEXT_PUBLIC_SUPABASE_ANON_KEY
 # - SUPABASE_SERVICE_ROLE_KEY
+#
+# Required for Paddle Payments:
 # - NEXT_PUBLIC_PADDLE_TOKEN
+# - NEXT_PUBLIC_PADDLE_PRICE_COINS_50
+# - NEXT_PUBLIC_PADDLE_PRICE_COINS_200
+# - NEXT_PUBLIC_PADDLE_PRICE_COINS_500
+# - NEXT_PUBLIC_PADDLE_PRICE_PRO_MONTHLY
 # - PADDLE_API_KEY
 # - PADDLE_WEBHOOK_SECRET
-# - ADMIN_EMAILS
+# - PADDLE_PRICE_COINS_MAP
+#
+# Required for OpenAI API Generation:
+# - OPENAI_API_KEY
+# - OPENAI_MODEL (defaults to gpt-4o-mini if omitted)
+#
+# Admin & Security:
+# - ADMIN_EMAILS (comma-separated list)
+#
+# Analytics (optional):
 # - NEXT_PUBLIC_GOOGLE_ANALYTICS_ID
 
 # Webhook route for Paddle
